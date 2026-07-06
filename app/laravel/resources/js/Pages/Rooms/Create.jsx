@@ -48,15 +48,47 @@ export default function Create({ auth }) {
                             <label>部屋番号</label>
 
                             <input
-                                type="text"
+                                type="number"
                                 className="w-full border"
                                 value={data.room_number}
                                 onChange={(e) =>
                                     setData('room_number', e.target.value)
                                 }
                             />
+
+                            {errors.room_number && (
+                                <div className="text-red-500">
+                                    {errors.room_number}
+                                </div>
+                            )}
                         </div>
 
+                        <div className="mb-4">
+                            <label>最小人数</label>
+
+                            <input
+                                type="number"
+                                className="w-full border"
+                                value={data.capacity_min}
+                                onChange={(e) =>
+                                    setData('capacity_min', e.target.value)
+                                }
+                            />
+                        </div>
+                            
+                        <div className="mb-4">
+                            <label>最大人数</label>
+                            
+                            <input
+                                type="number"
+                                className="w-full border"
+                                value={data.capacity_max}
+                                onChange={(e) =>
+                                    setData('capacity_max', e.target.value)
+                                }
+                            />
+                        </div>
+                            
                         <button
                             type="submit"
                             disabled={processing}

@@ -44,41 +44,52 @@ export default function Index({ auth, rooms }) {
                         </thead>
 
                         <tbody>
-                            {rooms.data.map((room) => (
-                                <tr key={room.id}>
-                                    <td className="border p-2">
-                                        {room.room_number}
-                                    </td>
-
-                                    <td className="border p-2">
-                                        {room.name}
-                                    </td>
-
-                                    <td className="border p-2">
-                                        {room.capacity_min}
-                                    </td>
-
-                                    <td className="border p-2">
-                                        {room.capacity_max}
-                                    </td>
-
-                                    <td className="border p-2">
-                                        <Link
-                                            href={route('rooms.edit', room.id)}
-                                            className="text-blue-600"
-                                        >
-                                            編集
-                                        </Link>
-
-                                        <button
-                                            onClick={() => deleteRoom(room.id)}
-                                            className="text-red-600"
-                                        >
-                                            削除
-                                        </button>
+                            {rooms.data.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan="5"
+                                        className="border p-2 text-center"
+                                    >
+                                        データがありません
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                rooms.data.map((room) => (
+                                    <tr key={room.id}>
+                                        <td className="border p-2">
+                                            {room.room_number}
+                                        </td>
+                                
+                                        <td className="border p-2">
+                                            {room.name}
+                                        </td>
+                                
+                                        <td className="border p-2">
+                                            {room.capacity_min}
+                                        </td>
+                                
+                                        <td className="border p-2">
+                                            {room.capacity_max}
+                                        </td>
+                                
+                                        <td className="border p-2">
+                                            <Link
+                                                href={route('rooms.edit', room.id)}
+                                                className="text-blue-600 mr-3"
+                                            >
+                                                編集
+                                            </Link>
+                                
+                                            <button
+                                                onClick={() => deleteRoom(room.id)}
+                                                className="text-red-600"
+                                            >
+                                                削除
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
 
