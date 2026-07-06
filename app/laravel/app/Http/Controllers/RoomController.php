@@ -74,18 +74,18 @@ class RoomController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'max:255'],
-    
+
             'room_number' => [
                 'required',
                 Rule::unique('rooms')->ignore($room->id),
             ],
-    
+
             'capacity_min' => ['required', 'integer'],
             'capacity_max' => ['required', 'integer'],
         ]);
-    
+
         $room->update($validated);
-    
+
         return redirect()
             ->route('rooms.index')
             ->with('success', '部屋情報を更新しました');
@@ -96,6 +96,10 @@ class RoomController extends Controller
      */
     public function destroy(Room $room)
     {
-        //
+            $room->delete();
+
+            return redirect()
+                ->route('rooms.index')
+                ->with('success', '部屋を削除しました');
     }
 }

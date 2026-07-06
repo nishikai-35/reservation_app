@@ -1,7 +1,18 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
 export default function Index({ auth, rooms }) {
+
+    const deleteRoom = (id) => {
+        if (!confirm('削除してもよろしいですか？')) {
+            return;
+        }
+
+        router.delete(
+            route('rooms.destroy', id)
+        );
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -58,6 +69,13 @@ export default function Index({ auth, rooms }) {
                                         >
                                             編集
                                         </Link>
+
+                                        <button
+                                            onClick={() => deleteRoom(room.id)}
+                                            className="text-red-600"
+                                        >
+                                            削除
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
