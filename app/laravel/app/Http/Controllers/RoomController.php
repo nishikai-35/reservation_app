@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class RoomController extends Controller
 {
@@ -12,7 +14,12 @@ class RoomController extends Controller
      */
     public function index()
     {
-        //
+        $rooms = Room::orderby('room_number')
+            ->paginate(10);
+
+        return Inertia::render('Rooms/Index', [
+            'rooms' => $rooms
+        ]);
     }
 
     /**
@@ -20,7 +27,7 @@ class RoomController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Rooms/Create');
     }
 
     /**
@@ -28,7 +35,18 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required', 'max:255'],
+            'room_number' => ['required', 'unique:rooms'],
+            'capacity_min' => ['required', 'integer'],
+            'capacity_max' => ['required', 'integer'],
+        ]);
+
+        Room::create($validated);
+
+        return redirect()
+            ->route('rooms.index')
+            ->with('success', '部屋を登録しました');
     }
 
     /**
@@ -44,7 +62,9 @@ class RoomController extends Controller
      */
     public function edit(Room $room)
     {
-        //
+        return Inertia::render('Rooms/Edit', [
+            'room' => $room
+        ]);
     }
 
     /**
@@ -52,7 +72,23 @@ class RoomController extends Controller
      */
     public function update(Request $request, Room $room)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required', 'max:255'],
+    
+            'room_number' => [
+                'required',
+                Rule::unique('rooms')->ignore($room->id),
+            ],
+    
+            'capacity_min' => ['required', 'integer'],
+            'capacity_max' => ['required', 'integer'],
+        ]);
+    
+        $room->update($validated);
+    
+        return redirect()
+            ->route('rooms.index')
+            ->with('success', '部屋情報を更新しました');
     }
 
     /**
