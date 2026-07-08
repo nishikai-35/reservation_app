@@ -156,27 +156,27 @@ class ReservationController extends Controller
             'note' => ['nullable', 'string'],
             'status' => ['required', 'integer'],
         ]);
-    
+
         $exists = Reservation::where('room_id', $validated['room_id'])
             ->where('status', '!=', 9)
             ->where('id', '!=', $reservation->id)
             ->where('checkin_date', '<', $validated['checkout_date'])
             ->where('checkout_date', '>', $validated['checkin_date'])
             ->exists();
-    
+
         if ($exists) {
             return back()->withErrors([
                 'room_id' => '指定された期間は既に予約があります。',
             ])->withInput();
         }
-    
+
         $validated['adult_count'] = $validated['adult_count'] ?? 0;
         $validated['child_count'] = $validated['child_count'] ?? 0;
         $validated['amount'] = $validated['amount'] ?? 0;
         $validated['payment_status'] = $validated['payment_status'] ?? 0;
-    
+
         $reservation->update($validated);
-    
+
         return redirect()
             ->route('reservations.index')
             ->with('success', '予約を更新しました。');
@@ -192,5 +192,19 @@ class ReservationController extends Controller
         return redirect()
             ->route('reservations.index')
             ->with('success', '予約を削除しました。');
+    }
+
+
+    public function updateStatus(Request $request, Reservation $reservation)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'integer', 'in:1,2,3,4,5,8,9'],
+        ]);
+    
+        $reservation->update([
+            'status' => $validated['status'],
+        ]);
+    
+        return back()->with('success', 'ステータスを更新しました。');
     }
 }

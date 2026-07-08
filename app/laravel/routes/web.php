@@ -17,9 +17,9 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 
 // 認証グループ
@@ -33,15 +33,22 @@ Route::middleware('auth')->group(function () {
 
     // reservationsルート
     Route::get('/reservations', [ReservationController::class, 'index'])
-    ->name('reservations.index');
+        ->name('reservations.index');
+
     Route::post('/reservations', [ReservationController::class, 'store'])
-    ->name('reservations.store');
-    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])
-    ->name('reservations.destroy');
+        ->name('reservations.store');
+
     Route::get('/reservations/{reservation}/edit', [ReservationController::class, 'edit'])
-    ->name('reservations.edit');
+        ->name('reservations.edit');
+
     Route::put('/reservations/{reservation}', [ReservationController::class, 'update'])
-    ->name('reservations.update');
+        ->name('reservations.update');
+
+    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])
+        ->name('reservations.destroy');
+
+    Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])
+    ->name('reservations.updateStatus');
 });
 
 require __DIR__.'/auth.php';
