@@ -1,6 +1,5 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
-import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
@@ -18,18 +17,45 @@ export default function AuthenticatedLayout({ header, children }) {
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
+
+                                {/* ロゴ */}
                                 <Link href="/">
                                     <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
                                 </Link>
-                            </div>
-
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
+                                
+                                {/* 管理メニュー */}
+                                <nav className="space-x-4">
+                                    <Link
+                                        href={route('dashboard')}
+                                        className="text-gray-700"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <Link
+                                        href={route('rooms.index')}
+                                        className="text-gray-700"
+                                    >
+                                        部屋管理
+                                    </Link>
+                                    <Link
+                                        href={route('reservations.index')}
+                                        className="text-gray-700"
+                                    >
+                                        予約管理
+                                    </Link>
+                                    <Link
+                                        href={route('room-calendar.index')}
+                                        className="text-gray-700"
+                                    >
+                                        部屋カレンダー
+                                    </Link>
+                                    <Link
+                                        href={route('analysis.index')}
+                                        className="text-gray-700"
+                                    >
+                                        集計分析
+                                    </Link>
+                                </nav>
                             </div>
                         </div>
 

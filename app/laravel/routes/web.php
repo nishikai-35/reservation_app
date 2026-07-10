@@ -4,8 +4,12 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RoomCalendarController;
+use App\Http\Controllers\AnalysisController;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -48,7 +52,18 @@ Route::middleware('auth')->group(function () {
         ->name('reservations.destroy');
 
     Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])
-    ->name('reservations.updateStatus');
+        ->name('reservations.updateStatus');
+
+    // Calendarルート
+    Route::get('/room-calendar', [RoomCalendarController::class, 'index'])
+        ->name('room-calendar.index');
+
+    // Analysisルート
+    Route::get('/analysis', [AnalysisController::class, 'index'])
+        ->name('analysis.index');
+
+    Route::get('/analysis/export', [AnalysisController::class, 'export'])
+        ->name('analysis.export');
 });
 
 require __DIR__.'/auth.php';

@@ -1,6 +1,10 @@
+import { router } from '@inertiajs/react';
+
 export default function ReservationModal({
     reservation,
     onClose,
+    onEdit,
+    onSuccess,
 }) {
     if (!reservation) return null;
 
@@ -14,12 +18,48 @@ export default function ReservationModal({
                 <p>予約番号: {reservation.reservation_number}</p>
                 <p>宿泊者名: {reservation.guest_name}</p>
 
-                <button
-                    onClick={onClose}
-                    className="mt-4 rounded bg-gray-500 px-4 py-2 text-white"
-                >
-                    閉じる
-                </button>
+                <div className="mt-4 flex gap-2">
+                    <button
+                        onClick={() => onEdit(reservation)}
+                        className="rounded bg-blue-600 px-4 py-2 text-white"
+                    >
+                        編集
+                    </button>
+
+                    <button
+                        onClick={onClose}
+                        className="rounded bg-gray-500 px-4 py-2 text-white"
+                    >
+                        閉じる
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            if (!confirm('予約をキャンセルしますか？')) {
+                                return;
+                            }
+                        
+                            router.patch(
+                                route(
+                                    'reservations.updateStatus',
+                                    reservation.id
+                                ),
+                                {
+                                    status: 9,
+                                },
+                                {
+                                    onSuccess: () => {
+                                        console.log('キャンセル成功');
+                                        onClose();
+                                    },
+                                }
+                            );
+                        }}
+                        className="rounded bg-red-600 px-4 py-2 text-white"
+                    >
+                        キャンセル
+                    </button>
+                </div>
             </div>
         </div>
     );
