@@ -6,12 +6,15 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RoomCalendarController;
 use App\Http\Controllers\AnalysisController;
+use App\Mail\TestMail;
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 
 use Inertia\Inertia;
 
+// ログインルート
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -21,9 +24,20 @@ Route::get('/', function () {
     ]);
 });
 
+// ダッシュボードルート
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+
+// メール送信ルート
+Route::get('/mail-test', function () {
+
+    Mail::to('test@example.com')
+        ->send(new TestMail());
+
+    return 'メール送信完了';
+});
 
 
 // 認証グループ

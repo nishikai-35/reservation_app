@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Reservation;
 use App\Models\Room;
+use App\Mail\ReservationCreatedMail;
+use App\Mail\AdminReservationNotificationMail;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+
 use Inertia\Inertia;
 
 class ReservationController extends Controller
@@ -108,7 +113,23 @@ class ReservationController extends Controller
         }
 
         
-        Reservation::create($validated);
+        // 予約登録
+        $reservation = Reservation::create($validated);
+
+        // 予約者へメール送信
+        if ($reservation->email) {
+            Mail::to($reservation->email)
+                ->send(
+                    new ReservationCreatedMail($reservation)
+                );
+        }
+
+        // 管理者へ通知メール送信
+        Mail::to('admin@examle.com')
+            ->send(
+                new AdminReservationNotificationMail($reservation)
+            );
+
 
         return redirect()
             ->route('reservations.index')
