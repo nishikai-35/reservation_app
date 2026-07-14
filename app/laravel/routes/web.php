@@ -6,6 +6,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RoomCalendarController;
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\BookingController;
 use App\Mail\TestMail;
 
 use Illuminate\Support\Facades\Mail;
@@ -38,6 +39,41 @@ Route::get('/mail-test', function () {
 
     return 'メール送信完了';
 });
+
+
+// 予約フォームルート
+Route::get('/booking',
+    [BookingController::class,'create']
+)
+    ->name('booking.create');
+
+Route::post(
+    '/booking',
+    [BookingController::class, 'store']
+)->name('booking.store');
+
+
+// 料金計算処理ルート
+Route::post(
+    '/booking/calculate',
+    [BookingController::class,'calculatePrice']
+)
+->name('booking.calculate');
+
+
+// 予約フォーム登録完了ルート
+Route::get('/booking/complete', function () {
+    return Inertia::render(
+        'Booking/Complete'
+    );
+})->name('booking.complete');
+
+
+// 空室確認ルート
+Route::post(
+    '/booking/search',
+    [BookingController::class,'search']
+)->name('booking.search');
 
 
 // 認証グループ

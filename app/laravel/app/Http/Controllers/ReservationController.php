@@ -125,7 +125,7 @@ class ReservationController extends Controller
         }
 
         // 管理者へ通知メール送信
-        Mail::to('admin@examle.com')
+        Mail::to('admin@example.com')
             ->send(
                 new AdminReservationNotificationMail($reservation)
             );
