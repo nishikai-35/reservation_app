@@ -5,7 +5,13 @@ import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
+
+    const { auth } = usePage().props;
+
+    const user = auth.user;
+
+    const isAdmin =
+        auth.roles.includes('admin');
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -31,36 +37,56 @@ export default function AuthenticatedLayout({ header, children }) {
                                     >
                                         Dashboard
                                     </Link>
-                                    <Link
-                                        href={route('rooms.index')}
-                                        className="text-gray-700"
-                                    >
-                                        部屋管理
-                                    </Link>
+
+                                    {/* メニュー制限 */}
+                                    {
+                                        isAdmin && (
+                                            <Link
+                                                href={route('rooms.index')}
+                                                className="text-gray-700"
+                                            >
+                                                部屋管理
+                                            </Link>
+                                        )
+                                    }
+
                                     <Link
                                         href={route('reservations.index')}
                                         className="text-gray-700"
                                     >
                                         予約管理
                                     </Link>
+
                                     <Link
                                         href={route('room-calendar.index')}
                                         className="text-gray-700"
                                     >
                                         部屋カレンダー
                                     </Link>
-                                    <Link
-                                        href={route('analysis.index')}
-                                        className="text-gray-700"
-                                    >
-                                        集計分析
-                                    </Link>
-                                    <Link
-                                        href={route('users.index')}
-                                        className="text-gray-700"
-                                    >
-                                        ユーザー管理
-                                    </Link>
+
+                                    {/* メニュー制限 */}
+                                    {
+                                        isAdmin && (
+                                            <Link
+                                                href={route('analysis.index')}
+                                                className="text-gray-700"
+                                            >
+                                                集計分析
+                                            </Link>
+                                        )
+                                    }
+
+                                    {/* メニュー制限 */}
+                                    {
+                                        isAdmin && (
+                                            <Link
+                                                href={route('users.index')}
+                                                className="text-gray-700"
+                                            >
+                                                ユーザー管理
+                                            </Link>
+                                        )
+                                    }
                                 </nav>
                                 
                             </div>

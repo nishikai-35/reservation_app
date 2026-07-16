@@ -60,6 +60,9 @@ class UserController extends Controller
                 Str::random(16)
             ),
         ]);
+
+        // 一般ユーザー権限付与
+        $user->assignRole('user');
     
         
         // パスワード設定用トークン作成

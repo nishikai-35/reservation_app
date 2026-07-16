@@ -35,7 +35,6 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 // メール送信ルート
 Route::get('/mail-test', function () {
-
     Mail::to('test@example.com')
         ->send(new TestMail());
 
@@ -90,17 +89,34 @@ Route::post(
 )->name('booking.search');
 
 
-// 認証グループ
+// 認証グループ(管理者)
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    // usersルート
+    Route::resource('users', UserController::class);
+
+    
+    // roomsルート
+    Route::resource('rooms', RoomController::class);
+
+
+    // Analysisルート
+    Route::get('/analysis', [AnalysisController::class, 'index'])
+        ->name('analysis.index');
+
+    Route::get('/analysis/export', [AnalysisController::class, 'export'])
+        ->name('analysis.export');
+});
+
+
+// 認証グループ(ログインユーザー共通)
 Route::middleware('auth')->group(function () {
+
+    // proflileルート
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // roomsルート
-    Route::resource('rooms', RoomController::class);
-
-    // usersルート
-    Route::resource('users', UserController::class);
 
     // reservationsルート
     Route::get('/reservations', [ReservationController::class, 'index'])
@@ -121,16 +137,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])
         ->name('reservations.updateStatus');
 
+
     // Calendarルート
     Route::get('/room-calendar', [RoomCalendarController::class, 'index'])
         ->name('room-calendar.index');
-
-    // Analysisルート
-    Route::get('/analysis', [AnalysisController::class, 'index'])
-        ->name('analysis.index');
-
-    Route::get('/analysis/export', [AnalysisController::class, 'export'])
-        ->name('analysis.export');
 });
 
 require __DIR__.'/auth.php';

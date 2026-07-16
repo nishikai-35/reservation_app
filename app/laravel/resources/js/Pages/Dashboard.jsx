@@ -1,7 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import ReservationModal from '@/Components/ReservationModal';
 import { useState } from 'react';
+
 
 export default function Dashboard({
     auth,
@@ -40,6 +41,13 @@ export default function Dashboard({
 
     // 予約詳細モーダルの表示状態を管理
     const [selectedReservation, setSelectedReservation] = useState(null);
+
+
+    const { auth: pageAuth } = usePage().props;
+
+    // role情報確認用
+    console.log(pageAuth);
+
 
     // ダッシュボード表示
     const ReservationTable = ({ title, reservations, dateLabel, actionLabel, actionStatus, }) => (
