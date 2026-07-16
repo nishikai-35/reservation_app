@@ -7,6 +7,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RoomCalendarController;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PasswordSetupController;
 use App\Mail\TestMail;
 
 use Illuminate\Support\Facades\Mail;
@@ -39,6 +41,18 @@ Route::get('/mail-test', function () {
 
     return 'メール送信完了';
 });
+
+
+// トークンルート
+Route::get(
+    '/password/setup/{token}',
+    [PasswordSetupController::class, 'create']
+)->name('password.setup');
+
+Route::post(
+    '/password/setup',
+    [PasswordSetupController::class, 'store']
+)->name('password.setup.store');
 
 
 // 予約フォームルート
@@ -84,6 +98,9 @@ Route::middleware('auth')->group(function () {
 
     // roomsルート
     Route::resource('rooms', RoomController::class);
+
+    // usersルート
+    Route::resource('users', UserController::class);
 
     // reservationsルート
     Route::get('/reservations', [ReservationController::class, 'index'])

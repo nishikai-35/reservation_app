@@ -55,7 +55,14 @@ export default function AuthenticatedLayout({ header, children }) {
                                     >
                                         集計分析
                                     </Link>
+                                    <Link
+                                        href={route('users.index')}
+                                        className="text-gray-700"
+                                    >
+                                        ユーザー管理
+                                    </Link>
                                 </nav>
+                                
                             </div>
                         </div>
 

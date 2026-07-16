@@ -40,9 +40,9 @@ class ReservationController extends Controller
                 $query->where('status', $status);
             })
             ->orderBy('checkin_date')
+
             ->paginate(20)
             ->withQueryString();
-
         return Inertia::render('Reservations/Index', [
             'reservations' => $reservations,
             'rooms' => Room::orderBy('room_number')->get(),

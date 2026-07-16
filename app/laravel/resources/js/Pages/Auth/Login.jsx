@@ -4,7 +4,7 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -12,6 +12,10 @@ export default function Login({ status, canResetPassword }) {
         password: '',
         remember: false,
     });
+
+    // パスワード設定後のフラッシュ取得
+    const { flash } = usePage().props;
+
 
     const submit = (e) => {
         e.preventDefault();
@@ -32,6 +36,14 @@ export default function Login({ status, canResetPassword }) {
             )}
 
             <form onSubmit={submit}>
+
+                {/* パスワード設定後のフラッシュメッセージ */}
+                {flash.success && (
+                    <div className="mb-4 text-green-600">
+                        {flash.success}
+                    </div>
+                )}
+
                 <div>
                     <InputLabel htmlFor="email" value="Email" />
 

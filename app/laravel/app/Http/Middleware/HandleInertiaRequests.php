@@ -14,6 +14,7 @@ class HandleInertiaRequests extends Middleware
      */
     protected $rootView = 'app';
 
+    
     /**
      * Determine the current asset version.
      */
@@ -21,6 +22,7 @@ class HandleInertiaRequests extends Middleware
     {
         return parent::version($request);
     }
+
 
     /**
      * Define the props that are shared by default.
@@ -31,8 +33,14 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+
             'auth' => [
                 'user' => $request->user(),
+            ],
+
+            'flash' => [
+                'success' => fn () =>
+                    $request->session()->get('success'),
             ],
         ];
     }
