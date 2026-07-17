@@ -49,7 +49,6 @@ class UserController extends Controller
             'email' => ['required', 'email', 'unique:users,email'],
         ]);
 
-
         // ユーザー作成
         $user = User::create([
             'name' => $validated['name'],
@@ -90,7 +89,6 @@ class UserController extends Controller
                 )
         );
 
-
         return redirect()
             ->route('users.index')
             ->with(
@@ -112,26 +110,75 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(User $user)
     {
-        //
+        return Inertia::render('Users/Edit', [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->getRoleNames()->first(),
+            ],
+        ]);
     }
 
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'role' => 'required'
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
+
+        $user->syncRoles([
+            $validated['role']
+        ]);
+
+        return redirect()
+            ->route('users.index')
+            ->with(
+                'success',
+                'ユーザー情報を更新しました'
+            );
     }
 
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        //
+        // 自分自身の削除防止
+        if (auth()->id() === $user->id) {
+
+            return redirect()
+                ->route('users.index')
+                ->with(
+                    'error',
+                    '自分自身を削除することはできません。'
+                );
+        }
+
+        // Spatie権限解除
+        $user->syncRoles([]);
+    
+        // ユーザー削除
+        $user->delete();
+
+        return redirect()
+            ->route('users.index')
+            ->with(
+                'success',
+                'ユーザーを削除しました。'
+            );
     }
 }

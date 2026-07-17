@@ -1,8 +1,19 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
 
-export default function Index({ auth, users }) {
+export default function Index({ auth, users, flash }) {
+
+    const handleDelete = (id) => {
+        if (
+            confirm('このユーザーを削除しますか？')
+        ) {
+
+            router.delete(
+                route('users.destroy', id)
+            );
+        }
+    };
 
     return (
         <AuthenticatedLayout
@@ -29,6 +40,13 @@ export default function Index({ auth, users }) {
                                 </Link>
                             </div>
 
+                            {/* 編集完了後のフラッシュメッセージ */}
+                            {flash?.success && (
+                                <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">
+                                    {flash.success}
+                                </div>
+                            )}
+
                             <table className="min-w-full border">
                                 <thead>
                                     <tr>
@@ -44,6 +62,9 @@ export default function Index({ auth, users }) {
                                         <th className="border p-2">
                                             登録日
                                         </th>
+                                        <th className="border p-2">
+                                            操作
+                                        </th>
                                     </tr>
                                 </thead>
 
@@ -53,15 +74,35 @@ export default function Index({ auth, users }) {
                                             <td className="border p-2">
                                                 {user.id}
                                             </td>
+
                                             <td className="border p-2">
                                                 {user.name}
                                             </td>
+                                            
                                             <td className="border p-2">
                                                 {user.email}
                                             </td>
+                                            
                                             <td className="border p-2">
                                                 {user.created_at}
                                             </td>
+                                            
+                                            <td className="border p-2">
+                                                <Link
+                                                    href={route('users.edit', user.id)}
+                                                    className="text-blue-500 hover:text-blue-700"
+                                                >
+                                                    編集
+                                                </Link>
+
+                                                <button
+                                                    onClick={() => handleDelete(user.id)}
+                                                    className="text-red-500"
+                                                >
+                                                    削除
+                                                </button>
+                                            </td>
+
                                         </tr>
                                     ))}
                                 </tbody>
