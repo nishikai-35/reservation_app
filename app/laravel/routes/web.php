@@ -9,6 +9,7 @@ use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PasswordSetupController;
+use App\Http\Controllers\ReservationImportController;
 use App\Mail\TestMail;
 
 use Illuminate\Support\Facades\Mail;
@@ -106,6 +107,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/analysis/export', [AnalysisController::class, 'export'])
         ->name('analysis.export');
+
+    
+    // インポートルート
+    Route::get('/reservations/import', [ReservationImportController::class, 'index'])
+        ->name('reservations.import');
+
+    Route::post('/reservations/import', [ReservationImportController::class, 'store'])
+        ->name('reservations.import.store');
 });
 
 
