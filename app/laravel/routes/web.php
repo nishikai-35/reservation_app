@@ -108,6 +108,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/analysis/export', [AnalysisController::class, 'export'])
         ->name('analysis.export');
 
+    Route::get('/analysis/daily', [AnalysisController::class, 'daily'])
+        ->name('analysis.daily');
+
     
     // インポートルート
     Route::get('/reservations/import', [ReservationImportController::class, 'index'])

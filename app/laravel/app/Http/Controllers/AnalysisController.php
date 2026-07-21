@@ -177,8 +177,12 @@ class AnalysisController extends Controller
                     $reservation->checkout_date
                 );
 
-                $usedRoomDays +=
-                    $checkout->diffInDays($checkin);
+                $stayDays = Carbon::parse($reservation->checkin_date)
+                    ->diffInDays(
+                        Carbon::parse($reservation->checkout_date)
+                    );
+
+                $usedRoomDays += $stayDays;
             }
 
             $monthlyOccupancy = 0;
@@ -236,13 +240,10 @@ class AnalysisController extends Controller
 
             foreach ($currentReservations as $reservation) {
 
-                $currentUsedRoomDays +=
-                    Carbon::parse(
-                        $reservation->checkout_date
-                    )->diffInDays(
-                        Carbon::parse(
-                            $reservation->checkin_date
-                        )
+            $currentUsedRoomDays +=
+                Carbon::parse($reservation->checkin_date)
+                    ->diffInDays(
+                        Carbon::parse($reservation->checkout_date)
                     );
             }
 
@@ -285,13 +286,10 @@ class AnalysisController extends Controller
 
             foreach ($previousReservations as $reservation) {
 
-                $previousUsedRoomDays +=
-                    Carbon::parse(
-                        $reservation->checkout_date
-                    )->diffInDays(
-                        Carbon::parse(
-                            $reservation->checkin_date
-                        )
+            $previousUsedRoomDays +=
+                Carbon::parse($reservation->checkin_date)
+                    ->diffInDays(
+                        Carbon::parse($reservation->checkout_date)
                     );
             }
 
@@ -328,7 +326,7 @@ class AnalysisController extends Controller
 
         // reactへ渡すデータ
         return Inertia::render(
-            'Analysis',
+            'Analysis/Index',
             [
 
                 'summary'=>[
@@ -336,15 +334,29 @@ class AnalysisController extends Controller
                     'month'=>$month,
 
                     'sales'=>$totalSales,
-                    'guests'=>$totalGuests,
+                    'guest_count' => $totalGuests,
                     'reservation_count'=>$reservationCount,
                     'occupancy_rate'=>$occupancyRate,
                     'room_count'=>$roomCount,
+                    'used_rooms' => $usedRoomDays,
+                    'total_rooms' => $roomCount,
+                    'adult_count' => $reservations->sum('adult_count'),
+                    'child_count' => $reservations->sum('child_count'),
                 ],
 
+                'chartData' => collect($comparisonData)->map(function ($item) {
+                    return [
+                            'month' => $item['month'],
+                            'sales' => $item['current_sales'],
+                            'previous_sales' => $item['previous_sales'],
+                            'occupancy' => $item['current_occupancy'],
+                            'previous_occupancy' => $item['previous_occupancy'],
+                                ];
+                }),
+
                 'dailyData' => $dailyData,
-                'monthlyData' => $monthlyData,
-                'comparisonData' => $comparisonData,
+                'year' => $year,
+                'month' => $month,
             ]
         );
     }
@@ -447,6 +459,71 @@ class AnalysisController extends Controller
             $callback,
             200,
             $headers
+        );
+    }
+
+    // 詳細内容（日別データ）
+    public function daily(Request $request)
+    {
+        $year = $request->year ?? now()->year;
+        $month = $request->month ?? now()->month;
+        $roomCount = Room::count();
+        $daysInMonth = Carbon::create($year, $month)->daysInMonth;
+
+
+        $dailyData = [];
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+
+            $date = Carbon::create(
+                $year,
+                $month,
+                $day
+            )->format('Y-m-d');
+
+            // その日に宿泊中の予約
+            $dayReservations = Reservation::where('status', '!=', 9)
+                ->whereDate('checkin_date', '<=', $date)
+                ->whereDate('checkout_date', '>', $date)
+                ->get();
+
+            // 売上
+            $sales = $dayReservations->sum('amount');
+
+            // 宿泊人数
+            $guests = $dayReservations->sum('guest_count');
+
+            // 稼働部屋数
+            $usedRooms = $dayReservations
+                ->pluck('room_id')
+                ->unique()
+                ->count();
+
+            // 稼働率
+            $occupancy = 0;
+
+            if ($roomCount > 0) {
+                $occupancy = round(
+                    ($usedRooms / $roomCount) * 100,
+                    1
+                );
+            }
+
+            $dailyData[] = [
+                'date' => $date,
+                'sales' => $sales,
+                'guests' => $guests,
+                'occupancy_rate' => $occupancy,
+            ];
+        }
+
+        
+        return Inertia::render(
+            'Analysis/Daily',
+            [
+                'year' => $year,
+                'month' => $month,
+                'dailyData' => $dailyData,
+            ]
         );
     }
 }

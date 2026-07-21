@@ -18,12 +18,37 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('id')->get();
+        $query = User::query();
+
+        // 名前検索
+        if ($request->filled('name')) {
+            $query->where(
+                'name',
+                'like',
+                '%' . $request->name . '%'
+            );
+        }       
+
+        // メール検索
+        if ($request->filled('email')) {
+            $query->where(
+                'email',
+                'like',
+                '%' . $request->email . '%'
+            );
+        }
 
         return Inertia::render('Users/Index', [
-            'users' => $users,
+            'users' => $query
+                ->orderBy('id')
+                ->get(),
+
+            'filters' => [
+                'name' => $request->input('name', ''),
+                'email' => $request->input('email', ''),
+            ],
         ]);
     }
 

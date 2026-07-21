@@ -16,214 +16,158 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
+    const menus = [
+        {
+            label: 'ホーム',
+            route: 'dashboard',
+        },
+        {
+            label: '予約一覧',
+            route: 'reservations.index',
+        },
+        {
+            label: '部屋状況',
+            route: 'room-calendar.index',
+        },
+        {
+            label: '予約インポート',
+            route: 'reservations.import',
+            admin: true,
+        },
+        {
+            label: '集計',
+            route: 'analysis.index',
+            admin: true,
+        },
+        {
+            label: '部屋マスター',
+            route: 'rooms.index',
+            admin: true,
+        },
+        {
+            label: 'ユーザー管理',
+            route: 'users.index',
+            admin: true,
+        },
+    ];
+
     return (
         <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 justify-between">
-                        <div className="flex">
-                            <div className="flex shrink-0 items-center">
+            <nav className="bg-slate-800 shadow-lg">
+                <div className="mx-auto max-w-7xl px-6">
+                    <div className="flex h-16 items-center justify-between">
 
-                                {/* ロゴ */}
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
-                                </Link>
+                        {/* 左側 */}
+                        <div className="flex items-center gap-8">
+
+                            <Link href={route('dashboard')}>
+                                <ApplicationLogo className="h-10 w-auto text-white" />
+                            </Link>
+
+                            <div className="flex items-center gap-2">
+
+                                {menus.map((menu) => {
                                 
-                                {/* 管理メニュー */}
-                                <nav className="space-x-4">
-                                    <Link
-                                        href={route('dashboard')}
-                                        className="text-gray-700"
-                                    >
-                                        Dashboard
-                                    </Link>
-
-                                    {/* メニュー制限 */}
-                                    {
-                                        isAdmin && (
-                                            <Link
-                                                href={route('rooms.index')}
-                                                className="text-gray-700"
-                                            >
-                                                部屋管理
-                                            </Link>
-                                        )
+                                    if (menu.admin && !isAdmin) {
+                                        return null;
                                     }
-
-                                    <Link
-                                        href={route('reservations.index')}
-                                        className="text-gray-700"
-                                    >
-                                        予約管理
-                                    </Link>
-
-                                    <Link
-                                        href={route('room-calendar.index')}
-                                        className="text-gray-700"
-                                    >
-                                        部屋カレンダー
-                                    </Link>
-
-                                    {/* メニュー制限 */}
-                                    {
-                                        isAdmin && (
-                                            <Link
-                                                href={route('analysis.index')}
-                                                className="text-gray-700"
-                                            >
-                                                集計分析
-                                            </Link>
-                                        )
-                                    }
-
-                                    {/* メニュー制限 */}
-                                    {
-                                        isAdmin && (
-                                            <Link
-                                                href={route('users.index')}
-                                                className="text-gray-700"
-                                            >
-                                                ユーザー管理
-                                            </Link>
-                                        )
-                                    }
-                                </nav>
                                 
-                            </div>
-                        </div>
-
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {user.name}
-
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
-
-                                    <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
+                                    return (
+                                        <Link
+                                            key={menu.route}
+                                            href={route(menu.route)}
+                                            className={
+                                                route().current(menu.route)
+                                                    ? "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white"
+                                                    : "rounded-md px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition"
+                                            }
                                         >
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                            </div>
-                        </div>
+                                            {menu.label}
+                                        </Link>
+                                    );
+                                
+                                })}
 
-                        <div className="-me-2 flex items-center sm:hidden">
-                            <button
-                                onClick={() =>
-                                    setShowingNavigationDropdown(
-                                        (previousState) => !previousState,
-                                    )
-                                }
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    className="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
+                            </div>
+                            
+                        </div>
+                            
+                        {/* 右側 */}
+                            
+                        <Dropdown>
+                            
+                            <Dropdown.Trigger>
+                            
+                                <button
+                                    className="
+                                    flex
+                                    items-center
+                                    gap-3
+                                    rounded-lg
+                                    bg-slate-700
+                                    px-4
+                                    py-2
+                                    text-white
+                                    hover:bg-slate-600
+                                    transition
+                                    "
                                 >
-                                    <path
-                                        className={
-                                            !showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={
-                                            showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    className={
-                        (showingNavigationDropdown ? 'block' : 'hidden') +
-                        ' sm:hidden'
-                    }
-                >
-                    <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <div className="border-t border-gray-200 pb-1 pt-4">
-                        <div className="px-4">
-                            <div className="text-base font-medium text-gray-800">
-                                {user.name}
-                            </div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {user.email}
-                            </div>
-                        </div>
-
-                        <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={route('logout')}
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
+                                
+                                    <div className="text-right">
+                            
+                                        <div className="text-xs text-slate-300">
+                                            ログイン中
+                                        </div>
+                            
+                                        <div className="font-semibold">
+                                            {user.name}
+                                        </div>
+                            
+                                    </div>
+                            
+                                    <svg
+                                        className="h-4 w-4"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                            
+                                </button>
+                            
+                            </Dropdown.Trigger>
+                            
+                            <Dropdown.Content>
+                            
+                                <Dropdown.Link
+                                    href={route('profile.edit')}
+                                >
+                                    プロフィール
+                                </Dropdown.Link>
+                            
+                                <Dropdown.Link
+                                    href={route('logout')}
+                                    method="post"
+                                    as="button"
+                                >
+                                    ログアウト
+                                </Dropdown.Link>
+                            
+                            </Dropdown.Content>
+                            
+                        </Dropdown>
+                            
                     </div>
                 </div>
             </nav>
 
             {header && (
-                <header className="bg-white shadow">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <header className="bg-white border-b border-gray-200">
+                    <div className="mx-auto max-w-7xl px-6 py-5">
                         {header}
                     </div>
                 </header>
