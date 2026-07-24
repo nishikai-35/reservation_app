@@ -41,7 +41,7 @@ class ReservationController extends Controller
             })
             ->orderBy('checkin_date')
 
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
 
             

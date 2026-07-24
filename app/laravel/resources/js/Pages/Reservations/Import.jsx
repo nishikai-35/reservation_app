@@ -22,7 +22,7 @@ export default function Import({ auth }) {
             user={auth.user}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Booking.com CSVインポート
+                    予約インポート
                 </h2>
             }
         >
@@ -37,6 +37,10 @@ export default function Import({ auth }) {
                                 <label className="block mb-2 text-sm font-medium">
                                     CSVファイル
                                 </label>
+
+                                <p className="mt-1 mb-6 text-sm text-gray-600">
+                                    楽天トラベル、Booking.com などの予約CSVを取り込みます。
+                                </p>
 
                                 <input
                                     type="file"

@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+
 
 export default function Create({
-     rooms=[], 
-     search={} 
+    auth,
+    rooms = [],
+    search = {},
     }) {
 
     const [price, setPrice] = useState(null);
@@ -71,296 +74,325 @@ export default function Create({
 
 
     return (
-        <div className="mx-auto max-w-2xl p-6">
+        <AuthenticatedLayout
+            user={auth.user}
+            header={
+                <h2 className="text-xl font-semibold text-gray-800">
+                    宿泊予約
+                </h2>
+            }
+        >
+            <Head title="宿泊予約" />
 
-            <h1 className="mb-6 text-2xl font-bold">
-                宿泊予約フォーム
-            </h1>
+            <div className="py-8">
+                <div className="mx-auto max-w-5xl px-4">
 
+                    <div className="rounded-xl bg-white shadow-md">
 
-            <form onSubmit={submit} className="space-y-4">
+                        <div className="border-b px-6 py-4">
+                            <h1 className="text-2xl font-bold text-gray-800">
+                                新規予約
+                            </h1>
 
-
-                {/* チェックイン */}
-                <div>
-                    <label>チェックイン日</label>
-
-                    <input
-                        type="date"
-                        className="w-full border p-2"
-                        value={data.checkin_date}
-                        onChange={(e) =>
-                            setData(
-                                'checkin_date',
-                                e.target.value
-                            )
-                        }
-                    />
-
-                    {errors.checkin_date && (
-                        <div className="text-red-500">
-                            {errors.checkin_date}
+                            <p className="mt-1 text-sm text-gray-500">
+                                宿泊予約を登録します。
+                            </p>
                         </div>
-                    )}
-                </div>
 
-                {/* チェックアウト */}
-                <div>
-                    <label>チェックアウト日</label>
-
-                    <input
-                        type="date"
-                        className="w-full border p-2"
-                        value={data.checkout_date}
-                        onChange={(e) =>
-                            setData(
-                                'checkout_date',
-                                e.target.value
-                            )
-                        }
-                    />
-                </div>
+                        <div className="p-6">
 
 
-                {/* 空室確認 */}
-                <button
-                    type="button"
-                    onClick={searchRoom}
-                    className="
-                    rounded
-                    bg-green-500
-                    px-4
-                    py-2
-                    text-white
-                    "
-                >
-                    空室確認
-                </button>
+                            <h1 className="mb-6 text-2xl font-bold">
+                                宿泊予約フォーム
+                            </h1>
 
 
-                {/* 空室一覧 */}
-                <div>
-                    <h2 className="mt-6 mb-3 text-lg font-bold">
-                        空室一覧
-                    </h2>
-                    {
-                        rooms.length === 0 &&
-                        <p>
-                            空室確認を行ってください。
-                        </p>
-                    }
+                            <form onSubmit={submit} className="space-y-4">
 
-                    {
-                        rooms.map(
-                            room => (
-                                <div
-                                    key={room.id}
-                                    className="mb-2"
-                                >
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="room_id"
-                                            value={room.id}
-                                            checked={
-                                                data.room_id ==
-                                                room.id
-                                            }
 
-                                            onChange={
-                                                e =>
-                                                    setData(
-                                                        'room_id',
-                                                        e.target.value
-                                                    )
-                                            }
-                                        />
+                                {/* チェックイン */}
+                                <div>
+                                    <label>チェックイン日</label>
 
-                                        {' '}
-                                        {room.room_number}
-                                        号室
-                                        {' '}
-                                        {room.name}
-                                    </label>
+                                    <input
+                                        type="date"
+                                        className="w-full border p-2"
+                                        value={data.checkin_date}
+                                        onChange={(e) =>
+                                            setData(
+                                                'checkin_date',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+
+                                    {errors.checkin_date && (
+                                        <div className="text-red-500">
+                                            {errors.checkin_date}
+                                        </div>
+                                    )}
                                 </div>
-                            )
-                        )
-                    }
+                                
+                                {/* チェックアウト */}
+                                <div>
+                                    <label>チェックアウト日</label>
+                                
+                                    <input
+                                        type="date"
+                                        className="w-full border p-2"
+                                        value={data.checkout_date}
+                                        onChange={(e) =>
+                                            setData(
+                                                'checkout_date',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                    
+                                    
+                                {/* 空室確認 */}
+                                <button
+                                    type="button"
+                                    onClick={searchRoom}
+                                    className="
+                                    rounded
+                                    bg-green-500
+                                    px-4
+                                    py-2
+                                    text-white
+                                    "
+                                >
+                                    空室確認
+                                </button>
+                                    
+                                    
+                                {/* 空室一覧 */}
+                                <div>
+                                    <h2 className="mt-6 mb-3 text-lg font-bold">
+                                        空室一覧
+                                    </h2>
+                                    {
+                                        rooms.length === 0 &&
+                                        <p>
+                                            空室確認を行ってください。
+                                        </p>
+                                    }
 
-                    {
-                        errors.room_id &&
+                                    {
+                                        rooms.map(
+                                            room => (
+                                                <div
+                                                    key={room.id}
+                                                    className="mb-2"
+                                                >
+                                                    <label>
+                                                        <input
+                                                            type="radio"
+                                                            name="room_id"
+                                                            value={room.id}
+                                                            checked={
+                                                                data.room_id ==
+                                                                room.id
+                                                            }
+                                                        
+                                                            onChange={
+                                                                e =>
+                                                                    setData(
+                                                                        'room_id',
+                                                                        e.target.value
+                                                                    )
+                                                            }
+                                                        />
 
-                        <div className="text-red-500">
+                                                        {' '}
+                                                        {room.room_number}
+                                                        号室
+                                                        {' '}
+                                                        {room.name}
+                                                    </label>
+                                                </div>
+                                            )
+                                        )
+                                    }
 
-                            {errors.room_id}
+                                    {
+                                        errors.room_id &&
+                                    
+                                        <div className="text-red-500">
+                                        
+                                            {errors.room_id}
+                                    
+                                        </div>
+                                    }
+                                </div>
+                                
+                                
+                                {/* 宿泊人数 */}
+                                <div>
+                                    <label>
+                                        宿泊人数
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        className="w-full border p-2"
+                                        value={data.guest_count}
+                                        onChange={
+                                            e =>
+                                                setData(
+                                                    'guest_count',
+                                                    e.target.value
+                                                )
+                                        }
+                                    />
+                                </div>
+                                    
+                                    
+                                {/* 大人人数 */}
+                                <div>
+                                    <label>大人人数</label>
+                                    
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        className="w-full border p-2"
+                                        value={data.adult_count}
+                                        onChange={(e) =>
+                                            setData(
+                                                'adult_count',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                    
+                                    
+                                {/* 子供人数 */}
+                                <div>
+                                    <label>子供人数</label>
+                                    
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        className="w-full border p-2"
+                                        value={data.child_count}
+                                        onChange={(e) =>
+                                            setData(
+                                                'child_count',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                    
+                                    
+                                {/* 料金計算ボタン */}
+                                <button
+                                    type="button"
+                                    onClick={calculatePrice}
+                                    className="rounded bg-green-500 px-4 py-2 text-white"
+                                >
+                                    料金計算
+                                </button>
+                                    
+                                    
+                                {/* 金額表示追加 */}
+                                {price !== null && (
+                                    <div className="rounded border p-3">
+                                        <p>
+                                            合計料金：
+                                            {price.toLocaleString()}
+                                            円
+                                        </p>
+                                    </div>
+                                )}
 
+                            
+                                {/* 氏名 */}
+                                <div>
+                                    <label>氏名</label>
+                            
+                                    <input
+                                        type="text"
+                                        className="w-full border p-2"
+                                        value={data.guest_name}
+                                        onChange={(e) =>
+                                            setData(
+                                                'guest_name',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                    
+                                    
+                                {/* メール */}
+                                <div>
+                                    <label>メールアドレス</label>
+                                    
+                                    <input
+                                        type="email"
+                                        className="w-full border p-2"
+                                        value={data.email}
+                                        onChange={(e) =>
+                                            setData(
+                                                'email',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                    
+                                    
+                                {/* 電話番号 */}
+                                <div>
+                                    <label>電話番号</label>
+                                    
+                                    <input
+                                        type="text"
+                                        className="w-full border p-2"
+                                        value={data.phone}
+                                        onChange={(e) =>
+                                            setData(
+                                                'phone',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                    
+                                    
+                                {/* 備考 */}
+                                <div>
+                                    <label>備考</label>
+                                    
+                                    <textarea
+                                        className="w-full border p-2"
+                                        value={data.note}
+                                        onChange={(e) =>
+                                            setData(
+                                                'note',
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                </div>
+                                    
+                                    
+                                {/* 登録 */}
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="rounded bg-blue-500 px-4 py-2 text-white"
+                                >
+                                    予約する
+                                </button>
+                            </form>
                         </div>
-                    }
-                </div>
-
-
-                {/* 宿泊人数 */}
-                <div>
-                    <label>
-                        宿泊人数
-                    </label>
-                    <input
-                        type="number"
-                        min="1"
-                        className="w-full border p-2"
-                        value={data.guest_count}
-                        onChange={
-                            e =>
-                                setData(
-                                    'guest_count',
-                                    e.target.value
-                                )
-                        }
-                    />
-                </div>
-
-
-                {/* 大人人数 */}
-                <div>
-                    <label>大人人数</label>
-
-                    <input
-                        type="number"
-                        min="1"
-                        className="w-full border p-2"
-                        value={data.adult_count}
-                        onChange={(e) =>
-                            setData(
-                                'adult_count',
-                                e.target.value
-                            )
-                        }
-                    />
-                </div>
-
-
-                {/* 子供人数 */}
-                <div>
-                    <label>子供人数</label>
-
-                    <input
-                        type="number"
-                        min="0"
-                        className="w-full border p-2"
-                        value={data.child_count}
-                        onChange={(e) =>
-                            setData(
-                                'child_count',
-                                e.target.value
-                            )
-                        }
-                    />
-                </div>
-
-
-                {/* 料金計算ボタン */}
-                <button
-                    type="button"
-                    onClick={calculatePrice}
-                    className="rounded bg-green-500 px-4 py-2 text-white"
-                >
-                    料金計算
-                </button>
-
-
-                {/* 金額表示追加 */}
-                {price !== null && (
-                    <div className="rounded border p-3">
-                        <p>
-                            合計料金：
-                            {price.toLocaleString()}
-                            円
-                        </p>
                     </div>
-                )}
-
-
-                {/* 氏名 */}
-                <div>
-                    <label>氏名</label>
-
-                    <input
-                        type="text"
-                        className="w-full border p-2"
-                        value={data.guest_name}
-                        onChange={(e) =>
-                            setData(
-                                'guest_name',
-                                e.target.value
-                            )
-                        }
-                    />
                 </div>
-
-
-                {/* メール */}
-                <div>
-                    <label>メールアドレス</label>
-
-                    <input
-                        type="email"
-                        className="w-full border p-2"
-                        value={data.email}
-                        onChange={(e) =>
-                            setData(
-                                'email',
-                                e.target.value
-                            )
-                        }
-                    />
-                </div>
-
-
-                {/* 電話番号 */}
-                <div>
-                    <label>電話番号</label>
-
-                    <input
-                        type="text"
-                        className="w-full border p-2"
-                        value={data.phone}
-                        onChange={(e) =>
-                            setData(
-                                'phone',
-                                e.target.value
-                            )
-                        }
-                    />
-                </div>
-
-
-                {/* 備考 */}
-                <div>
-                    <label>備考</label>
-
-                    <textarea
-                        className="w-full border p-2"
-                        value={data.note}
-                        onChange={(e) =>
-                            setData(
-                                'note',
-                                e.target.value
-                            )
-                        }
-                    />
-                </div>
-
-
-                {/* 登録 */}
-                <button
-                    type="submit"
-                    disabled={processing}
-                    className="rounded bg-blue-500 px-4 py-2 text-white"
-                >
-                    予約する
-                </button>
-
-            </form>
-        </div>
+            </div>
+        </AuthenticatedLayout>
     );
 }

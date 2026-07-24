@@ -1,7 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, router, Link } from '@inertiajs/react';
+import CreateReservationModal from '@/Components/CreateReservationModal';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Index({ auth, reservations, rooms = [] }) {
+    
+    // ステータス定義
     const statusLabels = {
         1: '予約済み',
         2: 'チェックイン済み',
@@ -11,6 +15,7 @@ export default function Index({ auth, reservations, rooms = [] }) {
         8: '保留',
         9: 'キャンセル',
     };
+
 
     // フォーム初期値
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -31,19 +36,57 @@ export default function Index({ auth, reservations, rooms = [] }) {
         status: 1,
     });
 
+
     // 予約データ未取得の場合の対策
     const reservationList = reservations?.data ?? [];
 
-    // 送信処理
-    const submit = (e) => {
-        e.preventDefault();
 
-        post(route('reservations.store'), {
-            onSuccess: () => reset(),
+    // 検索条件
+    const [search, setSearch] = useState({
+        reservation_number: '',
+        guest_name: '',
+        room_id: '',
+        status: '',
+        checkin_date: '',
+        checkout_date: '',
+    });
+
+    // 検索処理
+    const handleSearchChange = (e) => {
+        setSearch({
+            ...search,
+            [e.target.name]: e.target.value,
         });
     };
 
+    const handleSearch = (e) => {
+        e.preventDefault();
 
+        router.get(
+            route('reservations.index'),
+            search,
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    };
+
+    const clearSearch = () => {
+        setSearch({
+            reservation_number: '',
+            guest_name: '',
+            room_id: '',
+            status: '',
+            checkin_date: '',
+            checkout_date: '',
+        });
+
+        router.get(route('reservations.index'));
+    };
+
+
+    // 削除
     const deleteReservation = (id) => {
         if (!confirm('削除してもよろしいですか？')) {
             return;
@@ -52,280 +95,401 @@ export default function Index({ auth, reservations, rooms = [] }) {
         router.delete(route('reservations.destroy', id));
     };
 
+
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [selectedRoom, setSelectedRoom] = useState(null);
+
+
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2>予約管理</h2>}
+            header={
+                <h2 className="text-xl font-semibold text-gray-800">
+                    予約管理
+                </h2>
+            }
         >
             <Head title="予約管理" />
+            <div className="min-h-screen bg-gray-100 py-8">
+                <div className="mx-auto max-w-7xl px-6">
+                    <div className="mb-8">
 
-            <div className="py-6">
-                <div className="max-w-7xl mx-auto px-4">
+                        <h1 className="text-3xl font-bold">
+                            予約管理
+                        </h1>
 
-                    <form onSubmit={submit} className="mb-6 border p-4 rounded bg-white">
-                        <h3 className="mb-4 font-bold">新規予約登録</h3>
+                        <p className="mt-2 text-gray-500">
+                            予約情報の検索・確認・編集を行います。
+                        </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    </div>
+
+                    <div className="mb-8 rounded-xl border bg-white p-6 shadow-sm">
+                        <h2 className="mb-5 text-lg font-semibold">
+                            検索条件
+                        </h2>
+
+                        <form
+                            onSubmit={handleSearch}
+                            className="grid grid-cols-1 gap-4 md:grid-cols-3"
+                        >
+                            {/* 予約番号 */}
                             <div>
-                                <label className="block text-sm mb-1">部屋</label>
+                                <label className="mb-1 block text-sm font-medium">
+                                    予約番号
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="reservation_number"
+                                    value={search.reservation_number}
+                                    onChange={handleSearchChange}
+                                    className="w-full rounded-lg border px-3 py-2"
+                                />
+                            </div>
+
+                            {/* 宿泊者名 */}
+                                    <div>
+                                        <label className="mb-1 block text-sm font-medium">
+                                            宿泊者名
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            name="guest_name"
+                                            value={search.guest_name}
+                                            onChange={handleSearchChange}
+                                            className="w-full rounded-lg border px-3 py-2"
+                                        />
+                                    </div>
+
+                            {/* 部屋 */}
+                            <div>
+                                <label className="mb-1 block text-sm font-medium">
+                                    部屋
+                                </label>
+
                                 <select
-                                    value={data.room_id}
-                                    onChange={(e) => setData('room_id', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
+                                    name="room_id"
+                                    value={search.room_id}
+                                    onChange={handleSearchChange}
+                                    className="w-full rounded-lg border px-3 py-2"
                                 >
-                                    <option value="">選択してください</option>
+                                    <option value="">
+                                        全て
+                                    </option>
+
                                     {rooms.map((room) => (
-                                        <option key={room.id} value={room.id}>
+                                        <option
+                                            key={room.id}
+                                            value={room.id}
+                                        >
                                             {room.room_number} {room.name}
                                         </option>
                                     ))}
                                 </select>
-                                {errors.room_id && (
-                                    <div className="text-red-600 text-sm">{errors.room_id}</div>
-                                )}
                             </div>
-
+                                
+                            {/* ステータス */}
                             <div>
-                                <label className="block text-sm mb-1">宿泊者名</label>
-                                <input
-                                    type="text"
-                                    value={data.guest_name}
-                                    onChange={(e) => setData('guest_name', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
-                                {errors.guest_name && (
-                                    <div className="text-red-600 text-sm">{errors.guest_name}</div>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm mb-1">宿泊人数</label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={data.guest_count}
-                                    onChange={(e) => setData('guest_count', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
-                                {errors.guest_count && (
-                                    <div className="text-red-600 text-sm">{errors.guest_count}</div>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm mb-1">チェックイン日</label>
-                                <input
-                                    type="date"
-                                    value={data.checkin_date}
-                                    onChange={(e) => setData('checkin_date', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
-                                {errors.checkin_date && (
-                                    <div className="text-red-600 text-sm">{errors.checkin_date}</div>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm mb-1">チェックアウト日</label>
-                                <input
-                                    type="date"
-                                    value={data.checkout_date}
-                                    onChange={(e) => setData('checkout_date', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
-                                {errors.checkout_date && (
-                                    <div className="text-red-600 text-sm">{errors.checkout_date}</div>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm mb-1">ステータス</label>
+                                <label className="mb-1 block text-sm font-medium">
+                                    ステータス
+                                </label>
+                                
                                 <select
-                                    value={data.status}
-                                    onChange={(e) => setData('status', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
+                                    name="status"
+                                    value={search.status}
+                                    onChange={handleSearchChange}
+                                    className="w-full rounded-lg border px-3 py-2"
                                 >
+                                    <option value="">
+                                        全て
+                                    </option>
+                                
                                     {Object.entries(statusLabels).map(([value, label]) => (
-                                        <option key={value} value={value}>
+                                        <option
+                                            key={value}
+                                            value={value}
+                                        >
                                             {label}
                                         </option>
                                     ))}
                                 </select>
                             </div>
-
+                                
+                            {/* チェックイン */}
                             <div>
-                                <label className="block text-sm mb-1">大人人数</label>
+                                <label className="mb-1 block text-sm font-medium">
+                                    チェックイン
+                                </label>
+                                
                                 <input
-                                    type="number"
-                                    min="0"
-                                    value={data.adult_count}
-                                    onChange={(e) => setData('adult_count', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
+                                    type="date"
+                                    name="checkin_date"
+                                    value={search.checkin_date}
+                                    onChange={handleSearchChange}
+                                    className="w-full rounded-lg border px-3 py-2"
                                 />
                             </div>
-
+                                
+                            {/* チェックアウト */}
                             <div>
-                                <label className="block text-sm mb-1">子供人数</label>
+                                <label className="mb-1 block text-sm font-medium">
+                                    チェックアウト
+                                </label>
+                                
                                 <input
-                                    type="number"
-                                    min="0"
-                                    value={data.child_count}
-                                    onChange={(e) => setData('child_count', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
+                                    type="date"
+                                    name="checkout_date"
+                                    value={search.checkout_date}
+                                    onChange={handleSearchChange}
+                                    className="w-full rounded-lg border px-3 py-2"
                                 />
                             </div>
+                                
+                            {/* ボタン */}
+                            <div className="md:col-span-3 flex justify-end gap-3 mt-4">
+                                
+                                <button
+                                    type="button"
+                                    onClick={clearSearch}
+                                    className="rounded-lg border px-6 py-2 hover:bg-gray-100"
+                                >
+                                    クリア
+                                </button>
+                                
+                                <button
+                                    type="submit"
+                                    className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+                                >
+                                    検索
+                                </button>
+                            </div>
+                        </form>
+                    </div>
 
+
+                    {/* 一覧カード */}
+                    <div className="rounded-xl border bg-white shadow-sm">
+                        <div className="flex items-center justify-between border-b p-5">
                             <div>
-                                <label className="block text-sm mb-1">料金</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={data.amount}
-                                    onChange={(e) => setData('amount', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
+                                <h2 className="text-xl font-semibold">
+                                    予約一覧
+                                </h2>
+
+                                <p className="mt-1 text-sm text-gray-500">
+                                    検索結果：
+                                    {reservationList.length}
+                                    件
+                                </p>
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">電話番号</label>
-                                <input
-                                    type="text"
-                                    value={data.phone}
-                                    onChange={(e) => setData('phone', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm mb-1">メール</label>
-                                <input
-                                    type="email"
-                                    value={data.email}
-                                    onChange={(e) => setData('email', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
-                                {errors.email && (
-                                    <div className="text-red-600 text-sm">{errors.email}</div>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm mb-1">決済方法</label>
-                                <input
-                                    type="text"
-                                    value={data.payment_method}
-                                    onChange={(e) => setData('payment_method', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
-                            </div>
-
-                            <div className="md:col-span-3">
-                                <label className="block text-sm mb-1">住所</label>
-                                <input
-                                    type="text"
-                                    value={data.address}
-                                    onChange={(e) => setData('address', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
-                            </div>
-
-                            <div className="md:col-span-3">
-                                <label className="block text-sm mb-1">備考</label>
-                                <textarea
-                                    value={data.note}
-                                    onChange={(e) => setData('note', e.target.value)}
-                                    className="w-full border rounded px-2 py-1"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="mt-4">
                             <button
-                                type="submit"
-                                disabled={processing}
-                                className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+                                type="button"
+                                onClick={() => setShowCreateModal(true)}
+                                className="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
                             >
-                                登録
+                                新規登録
                             </button>
                         </div>
-                    </form>
 
-                    <table className="min-w-full border bg-white">
-                        <thead>
-                            <tr>
-                                <th className="border p-2">予約番号</th>
-                                <th className="border p-2">宿泊者名</th>
-                                <th className="border p-2">人数</th>
-                                <th className="border p-2">部屋</th>
-                                <th className="border p-2">チェックイン</th>
-                                <th className="border p-2">チェックアウト</th>
-                                <th className="border p-2">ステータス</th>
-                                <th className="border p-2">操作</th>
-                            </tr>
-                        </thead>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full border-collapse">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="border-b p-3 text-left">
+                                            ステータス
+                                        </th>
 
-                        <tbody>
-                            {reservationList.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan="8"
-                                        className="border p-2 text-center"
-                                    >
-                                        データがありません
-                                    </td>
-                                </tr>
-                            ) : (
-                                reservationList.map((reservation) => (
-                                    <tr key={reservation.id}>
-                                        <td className="border p-2">
-                                            {reservation.reservation_number}
-                                        </td>
+                                        <th className="border-b p-3 text-left">
+                                            予約番号
+                                        </th>
 
-                                        <td className="border p-2">
-                                            {reservation.guest_name}
-                                        </td>
+                                        <th className="border-b p-3 text-left">
+                                            宿泊者名
+                                        </th>
 
-                                        <td className="border p-2">
-                                            {reservation.guest_count}
-                                        </td>
+                                        <th className="border-b p-3 text-left">
+                                            部屋
+                                        </th>
 
-                                        <td className="border p-2">
-                                            {reservation.room?.room_number} {reservation.room?.name}
-                                        </td>
+                                        <th className="border-b p-3 text-left">
+                                            チェックイン
+                                        </th>
 
-                                        <td className="border p-2">
-                                            {reservation.checkin_date}
-                                        </td>
+                                        <th className="border-b p-3 text-left">
+                                            チェックアウト
+                                        </th>
 
-                                        <td className="border p-2">
-                                            {reservation.checkout_date}
-                                        </td>
+                                        <th className="border-b p-3 text-center">
+                                            人数
+                                        </th>
 
-                                        <td className="border p-2">
-                                            {statusLabels[reservation.status] ?? '不明'}
-                                        </td>
+                                        <th className="border-b p-3 text-left">
+                                            電話番号
+                                        </th>
 
-                                        <td className="border p-2">
-                                            <Link
-                                                href={route('reservations.edit', reservation.id)}
-                                                className="text-blue-600 mr-3"
-                                            >
-                                                編集
-                                            </Link>
-
-                                            <button
-                                                type="button"
-                                                onClick={() => deleteReservation(reservation.id)}
-                                                className="text-red-600"
-                                            >
-                                                削除
-                                            </button>
-                                        </td>
+                                        <th className="border-b p-3 text-center">
+                                            操作
+                                        </th>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                </thead>
+
+                                <tbody>
+                                    {reservationList.length === 0 ? (
+                                        <tr>
+                                            <td
+                                                colSpan="9"
+                                                className="p-8 text-center text-gray-500"
+                                            >
+                                                該当する予約はありません。
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        reservationList.map((reservation) => (
+                                            <tr
+                                                key={reservation.id}
+                                                className="hover:bg-gray-50"
+                                            >
+                                                {/* ステータス */}
+                                                <td className="border-b p-3">
+                                                    <span
+                                                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                                                            ${
+                                                                reservation.status == 1
+                                                                    ? 'bg-blue-100 text-blue-700'
+                                                                    : reservation.status == 2
+                                                                    ? 'bg-green-100 text-green-700'
+                                                                    : reservation.status == 3
+                                                                    ? 'bg-yellow-100 text-yellow-700'
+                                                                    : reservation.status == 4
+                                                                    ? 'bg-orange-100 text-orange-700'
+                                                                    : reservation.status == 5
+                                                                    ? 'bg-gray-200 text-gray-700'
+                                                                    : reservation.status == 8
+                                                                    ? 'bg-purple-100 text-purple-700'
+                                                                    : 'bg-red-100 text-red-700'
+                                                            }
+                                                        `}
+                                                    >
+                                                        {statusLabels[reservation.status]}
+                                                    </span>
+                                                </td>
+                                                        
+                                                {/* 予約番号 */}
+                                                <td className="border-b p-3">
+                                                    {reservation.reservation_number}
+                                                </td>
+                                                        
+                                                {/* 宿泊者名 */}
+                                                <td className="border-b p-3">
+                                                    {reservation.guest_name}
+                                                </td>
+                                                        
+                                                {/* 部屋 */}
+                                                <td className="border-b p-3">
+                                                    {reservation.room?.room_number}
+                                                    <br />
+                                                    <span className="text-sm text-gray-500">
+                                                        {reservation.room?.name}
+                                                    </span>
+                                                </td>
+                                                        
+                                                {/* チェックイン */}
+                                                <td className="border-b p-3">
+                                                    {reservation.checkin_date}
+                                                </td>
+                                                        
+                                                {/* チェックアウト */}
+                                                <td className="border-b p-3">
+                                                    {reservation.checkout_date}
+                                                </td>
+                                                        
+                                                {/* 人数 */}
+                                                <td className="border-b p-3 text-center">
+                                                    {reservation.guest_count}名
+                                                </td>
+                                                        
+                                                {/* 電話番号 */}
+                                                <td className="border-b p-3">
+                                                    {reservation.phone}
+                                                </td>
+                                                        
+                                                {/* 操作 */}
+                                                <td className="w-48 border-b p-3">
+                                                    <div className="flex justify-center gap-2">
+                                                        <Link
+                                                            href={route(
+                                                                'reservations.edit',
+                                                                reservation.id
+                                                            )}
+                                                            className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                                                        >
+                                                            編集
+                                                        </Link>
+                                                        
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                deleteReservation(
+                                                                    reservation.id
+                                                                )
+                                                            }
+                                                            className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
+                                                        >
+                                                            削除
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                                
+                    {/* ページネーション */}
+                    {reservations.links && (
+                        <div className="mt-6 flex justify-center gap-2">
+                        
+                            {reservations.links.map((link, index) => (
+                            
+                                <Link
+                                    key={index}
+                                    href={link.url ?? '#'}
+                                    dangerouslySetInnerHTML={{
+                                        __html: link.label,
+                                    }}
+                                    className={`rounded border px-3 py-2 text-sm
+                                        ${
+                                            link.active
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-white hover:bg-gray-100'
+                                        }
+                                        ${
+                                            !link.url
+                                                ? 'pointer-events-none opacity-50'
+                                                : ''
+                                        }
+                                    `}
+                                />
+                                    
+                            ))}
+                        </div>
+                    )}
+
+
+                    {/* モーダル表示 */}
+                    {showCreateModal && (
+                        <CreateReservationModal
+                            room={null}
+                            rooms={rooms}
+                            date={null}
+                            refreshReservations={() => router.reload()}
+                            onClose={() => setShowCreateModal(false)}
+                        />
+                    )}
 
                 </div>
             </div>

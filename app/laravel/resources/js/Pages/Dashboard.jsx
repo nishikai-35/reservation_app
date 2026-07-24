@@ -6,10 +6,15 @@ import { useState } from 'react';
 
 export default function Dashboard({
     auth,
+    today,
+    totalRooms,
+    todayCheckinCount,
+    todayCheckoutCount,
+    stayingCount,
     checkinReservations = [],
     checkoutReservations = [],
-    stayingGuestCount = 0,
-    today,
+    stayingReservation = [],
+    
 }) {
     const statusLabels = {
         1: '予約済み',
@@ -49,24 +54,55 @@ export default function Dashboard({
     console.log(pageAuth);
 
 
-    // ダッシュボード表示
-    const ReservationTable = ({ title, reservations, dateLabel, actionLabel, actionStatus, }) => (
-        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-            <div className="p-6">
-                <h3 className="mb-4 text-lg font-semibold text-gray-800">
+    // 予約テーブル表示
+    const ReservationTable = ({
+        title,
+        reservations,
+        dateLabel,
+        actionLabel,
+        actionStatus,
+    }) => (
+        <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+
+            {/* カードタイトル */}
+            <div className="border-b bg-gray-50 px-6 py-4">
+                <h3 className="text-xl font-bold text-gray-900">
                     {title}
                 </h3>
+            </div>
 
-                <table className="min-w-full border">
-                    <thead>
+            {/* テーブル */}
+            <div className="overflow-x-auto">
+                <table className="min-w-full">
+                    <thead className="bg-gray-100">
                         <tr>
-                            <th className="border p-2">予約番号</th>
-                            <th className="border p-2">宿泊者名</th>
-                            <th className="border p-2">部屋</th>
-                            <th className="border p-2">人数</th>
-                            <th className="border p-2">{dateLabel}</th>
-                            <th className="border p-2">ステータス</th>
-                            <th className="border p-2">操作</th>
+                            <th className="px-4 py-3 text-left text-sm font-semibold">
+                                予約番号
+                            </th>
+
+                            <th className="px-4 py-3 text-left text-sm font-semibold">
+                                宿泊者名
+                            </th>
+
+                            <th className="px-4 py-3 text-left text-sm font-semibold">
+                                部屋
+                            </th>
+
+                            <th className="px-4 py-3 text-center text-sm font-semibold">
+                                人数
+                            </th>
+
+                            <th className="px-4 py-3 text-center text-sm font-semibold">
+                                {dateLabel}
+                            </th>
+
+                            <th className="px-4 py-3 text-center text-sm font-semibold">
+                                ステータス
+                            </th>
+
+                            <th className="px-4 py-3 text-center text-sm font-semibold">
+                                操作
+                            </th>
                         </tr>
                     </thead>
 
@@ -75,61 +111,89 @@ export default function Dashboard({
                             <tr>
                                 <td
                                     colSpan="7"
-                                    className="border p-2 text-center"
+                                    className="py-12 text-center text-gray-500"
                                 >
-                                    データがありません
+                                    {title}はありません。
                                 </td>
                             </tr>
                         ) : (
-                            // テーブル
                             reservations.map((reservation) => (
-                                <tr 
+                                <tr
                                     key={reservation.id}
-                                    onClick={() => setSelectedReservation(reservation)}
-                                    className="cursor-pointer hover:bg-gray-50"
+                                    onClick={() =>
+                                        setSelectedReservation(
+                                            reservation
+                                        )
+                                    }
+                                    className="cursor-pointer border-t transition hover:bg-gray-50"
                                 >
-                                        <td className="border p-2">
-                                            {reservation.reservation_number}
-                                        </td>
-                                        <td className="border p-2">
-                                            {reservation.guest_name}
-                                        </td>
-                                        <td className="border p-2">
-                                            {reservation.room?.room_number} {reservation.room?.name}
-                                        </td>
-                                        <td className="border p-2">
-                                            {reservation.guest_count}
-                                        </td>
-                                        <td className="border p-2">
-                                            {dateLabel === 'チェックイン日'
-                                                ? reservation.checkin_date
-                                                : reservation.checkout_date}
-                                        </td>
 
-                                        {/* ステータス色分け */}
-                                        <td className="border p-2">
-                                            <span
-                                                className={`rounded px-2 py-1 text-xs font-semibold ${
-                                                    statusClasses[reservation.status]
-                                                }`}
-                                            >
-                                                {statusLabels[reservation.status] ?? '不明'}
-                                            </span>
-                                        </td>
-                                            
-                                        {/* 操作 */}
-                                        <td className="border p-2">
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    updateStatus(reservation.id, actionStatus);
-                                                }}
-                                                className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                                            >
-                                                {actionLabel}
-                                            </button>
-                                        </td>
+                                    {/* 予約番号 */}
+                                    <td className="px-4 py-4">
+                                        {reservation.reservation_number}
+                                    </td>
+
+                                    {/* 宿泊者 */}
+                                    <td className="px-4 py-4 font-medium">
+                                        {reservation.guest_name}
+                                    </td>
+
+                                    {/* 部屋 */}
+                                    <td className="px-4 py-4">
+                                        {reservation.room?.room_number}
+                                        <br />
+
+                                        <span className="text-sm text-gray-500">
+                                            {reservation.room?.name}
+                                        </span>
+                                    </td>
+
+                                    {/* 人数 */}
+                                    <td className="px-4 py-4 text-center">
+                                        {reservation.guest_count}名
+                                    </td>
+
+                                    {/* 日付 */}
+                                    <td className="px-4 py-4 text-center">
+                                        {dateLabel === 'チェックイン日'
+                                            ? reservation.checkin_date
+                                            : reservation.checkout_date}
+                                    </td>
+
+                                    {/* ステータス */}
+                                    <td className="px-4 py-4 text-center">
+                                        <span
+                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                                                statusClasses[
+                                                    reservation.status
+                                                ]
+                                            }`}
+                                        >
+                                            {statusLabels[
+                                                reservation.status
+                                            ]}
+                                        </span>
+                                    </td>
+
+                                    {/* 操作 */}
+                                    <td className="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+
+                                                e.stopPropagation();
+
+                                                updateStatus(
+                                                    reservation.id,
+                                                    actionStatus
+                                                );
+
+                                            }}
+                                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                                        >
+                                            {actionLabel}
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         )}
@@ -152,42 +216,92 @@ export default function Dashboard({
 
             <div className="py-6">
                 <div className="mx-auto max-w-7xl px-4">
-                    <div className="mb-6">
-                        <p className="text-sm text-gray-600">
-                            対象日: {today}
-                        </p>
+
+                    {/* タイトル */}
+                    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                        <div className="mb-8 flex items-start justify-between">
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900">
+                                    ダッシュボード
+                                </h1>
+
+                                <p className="mt-2 text-gray-500">
+                                    本日の宿泊状況を確認できます。
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    router.visit(route('reservations.index'))
+                                }
+                                className="rounded-lg bg-gray-900 px-6 py-3 font-semibold text-white transition hover:bg-black"
+                            >
+                                新規登録
+                            </button>
+                        </div>
+                            
+                        {/* KPIカード */}
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+                            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                                <div className="text-lg font-semibold text-gray-700">
+                                    総部屋数
+                                </div>
+
+                                <div className="mt-4 text-5xl font-bold text-gray-900">
+                                    5
+                                </div>
+
+                                <div className="mt-2 text-sm text-gray-500">
+                                    登録済みの部屋数
+                                </div>
+                            </div>
+
+                            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                                <div className="text-lg font-semibold text-gray-700">
+                                    本日チェックイン
+                                </div>
+
+                                <div className="mt-4 text-5xl font-bold text-blue-600">
+                                    {checkinReservations.length}
+                                </div>
+
+                                <div className="mt-2 text-sm text-gray-500">
+                                    本日の到着予定
+                                </div>
+                            </div>
+                    
+                            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                                <div className="text-lg font-semibold text-gray-700">
+                                    本日チェックアウト
+                                </div>
+
+                                <div className="mt-4 text-5xl font-bold text-red-500">
+                                    {checkoutReservations.length}
+                                </div>
+
+                                <div className="mt-2 text-sm text-gray-500">
+                                    本日の出発予定
+                                </div>
+                            </div>
+
+                            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                                <div className="text-lg font-semibold text-gray-700">
+                                    本日宿泊中
+                                </div>
+
+                                <div className="mt-4 text-5xl font-bold text-green-600">
+                                    {stayingCount}
+                                </div>
+
+                                <div className="mt-2 text-sm text-gray-500">
+                                    現在滞在中の人数
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-                        <div className="bg-white p-4 shadow-sm sm:rounded-lg">
-                            <div className="text-sm text-gray-600">
-                                本日のチェックイン
-                            </div>
-                            <div className="mt-2 text-2xl font-bold">
-                                {checkinReservations.length} 件
-                            </div>
-                        </div>
-
-                        <div className="bg-white p-4 shadow-sm sm:rounded-lg">
-                            <div className="text-sm text-gray-600">
-                                本日のチェックアウト
-                            </div>
-                            <div className="mt-2 text-2xl font-bold">
-                                {checkoutReservations.length} 件
-                            </div>
-                        </div>
-
-                        <div className="bg-white p-4 shadow-sm sm:rounded-lg">
-                            <div className="text-sm text-gray-600">
-                                滞在中人数
-                            </div>
-                            <div className="mt-2 text-2xl font-bold">
-                                {stayingGuestCount} 人
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-6">
+                    <div className="mt-8 space-y-6">
                         <ReservationTable
                             title="本日のチェックイン予定"
                             reservations={checkinReservations}

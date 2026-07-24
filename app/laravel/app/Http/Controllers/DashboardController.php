@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservation;
+use App\Models\Room;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -11,28 +12,44 @@ class DashboardController extends Controller
     {
         $today = now()->toDateString();
 
+        // 本日チェックイン
         $checkinReservations = Reservation::with('room')
             ->whereDate('checkin_date', $today)
             ->whereNotIn('status', [5, 9])
             ->orderBy('checkin_date')
             ->get();
 
+        // 本日チェックアウト
         $checkoutReservations = Reservation::with('room')
             ->whereDate('checkout_date', $today)
             ->whereNotIn('status', [5, 9])
             ->orderBy('checkout_date')
             ->get();
 
-        $stayingGuestCount = Reservation::where('checkin_date', '<=', $today)
+        // 滞在中
+        $stayingReservations = Reservation::with('room')
+            ->where('checkin_date', '<=', $today)
             ->where('checkout_date', '>', $today)
             ->whereNotIn('status', [5, 9])
-            ->sum('guest_count');
+            ->orderBy('room_id')
+            ->get();
+
+        // KPI
+        $totalRooms = Room::count();
+        $todayCheckinCount = $checkinReservations->count();
+        $todayCheckoutCount = $checkoutReservations->count();
+        $stayingCount = $stayingReservations->count();
 
         return Inertia::render('Dashboard', [
+
             'today' => $today,
+            'totalRooms' => $totalRooms,
+            'todayCheckinCount' => $todayCheckinCount,
+            'todayCheckoutCount' => $todayCheckoutCount,
+            'stayingCount' => $stayingCount,
             'checkinReservations' => $checkinReservations,
             'checkoutReservations' => $checkoutReservations,
-            'stayingGuestCount' => $stayingGuestCount,
+            'stayingReservations' => $stayingReservations,
         ]);
     }
 }

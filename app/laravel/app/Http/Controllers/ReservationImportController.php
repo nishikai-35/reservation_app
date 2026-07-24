@@ -8,6 +8,14 @@ use Inertia\Inertia;
 
 class ReservationImportController extends Controller
 {
+    private BookingImportService $bookingImportService;
+
+    public function __construct(
+        BookingImportService $bookingImportService
+    ) {
+        $this->bookingImportService = $bookingImportService;
+    }
+
     /**
      * インポート画面
      */
@@ -19,18 +27,26 @@ class ReservationImportController extends Controller
     /**
      * CSVアップロード
      */
-    public function store(
-        Request $request,
-        BookingImportService $service
-    )
+    public function store(Request $request)
     {
         $request->validate([
-            'csv' => ['required','file','mimes:csv,txt'],
+            'csv' => ['required', 'file', 'mimes:csv,txt'],
         ]);
 
-        $service->import(
-            $request->file('csv')->getRealPath()
-        );
+        $path = $request
+            ->file('csv')
+            ->getRealPath();
+
+        try {
+
+            $this->bookingImportService->import($path);
+
+        } catch (\Exception $e) {
+
+            return back()->withErrors([
+                'csv' => $e->getMessage(),
+            ]);
+        }
 
         return back()->with(
             'success',

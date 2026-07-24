@@ -366,6 +366,7 @@ export default function RoomCalendar({
             {selectedRoom && (
                 <CreateReservationModal
                     room={selectedRoom}
+                    rooms={rooms}
                     date={selectedDate}
                     refreshReservations={refreshReservations}
                     onClose={() => {

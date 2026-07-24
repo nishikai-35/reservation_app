@@ -40,7 +40,7 @@ export default function AuthenticatedLayout({ header, children }) {
             admin: true,
         },
         {
-            label: '部屋マスター',
+            label: 'マスター管理',
             route: 'rooms.index',
             admin: true,
         },
