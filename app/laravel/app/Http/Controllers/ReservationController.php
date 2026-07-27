@@ -81,7 +81,7 @@ class ReservationController extends Controller
             'adult_count' => ['nullable', 'integer', 'min:0'],
             'child_count' => ['nullable', 'integer', 'min:0'],
             'amount' => ['nullable', 'integer', 'min:0'],
-            'payment_status' => ['nullable', 'integer'],
+            'payment_status' => ['required', 'integer'],
             'payment_method' => ['nullable', 'string', 'max:255'],
             'guest_name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
@@ -127,10 +127,10 @@ class ReservationController extends Controller
         }
 
         // 管理者へ通知メール送信
-        Mail::to('admin@example.com')
-            ->send(
-                new AdminReservationNotificationMail($reservation)
-            );
+        // Mail::to('admin@example.com')
+        //     ->send(
+        //         new AdminReservationNotificationMail($reservation)
+        //     );
 
 
         return redirect()

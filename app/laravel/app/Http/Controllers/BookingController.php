@@ -27,7 +27,6 @@ class BookingController extends Controller
     // 空室確認処理
     public function search(Request $request)
     {
-
         $validated = $request->validate([
             'checkin_date' => [
                 'required',
@@ -41,41 +40,29 @@ class BookingController extends Controller
             ],
         ]);
 
+        $rooms = Room::select(
+                'id',
+                'room_number',
+                'name',
+                'adult_price',
+                'child_price'
+            )
+            ->whereNotExists(function ($query) use ($validated) {
+                $query->selectRaw(1)
+                    ->from('reservations')
+                    ->whereColumn('reservations.room_id', 'rooms.id')
+                    ->where('status', '!=', 9)
+                    ->where('checkin_date', '<', $validated['checkout_date'])
+                    ->where('checkout_date', '>', $validated['checkin_date']);
+            })
+            ->orderBy('room_number')
+            ->get();
 
-        $rooms = Room::whereNotExists(function($query) use ($validated){
-
-            $query->selectRaw(1)
-                ->from('reservations')
-                ->whereColumn(
-                    'reservations.room_id',
-                    'rooms.id'
-                )
-                ->where('status','!=',9)
-                ->where(
-                    'checkin_date',
-                    '<',
-                    $validated['checkout_date']
-                )
-                ->where(
-                    'checkout_date',
-                    '>',
-                    $validated['checkin_date']
-                );
-
-        })
-        ->orderBy('room_number')
-        ->get();
-
-
-        return Inertia::render(
-            'Booking/Create',
-            [
-                'rooms'=>$rooms,
-                'search'=>$validated
-            ]
-        );
-
+                return response()->json([
+                    'rooms' => $rooms,
+                ]);
     }
+
 
     public function store(Request $request)
     {
@@ -83,7 +70,6 @@ class BookingController extends Controller
             'room_id' => ['required', 'exists:rooms,id'],
             'checkin_date' => ['required', 'date'],
             'checkout_date' => ['required', 'date', 'after:checkin_date'],
-            'guest_count' => ['required', 'integer', 'min:1'],
             'adult_count' => ['required', 'integer', 'min:1'],
             'child_count' => ['nullable', 'integer', 'min:0'],
             'guest_name' => ['required', 'string', 'max:255'],
@@ -91,6 +77,11 @@ class BookingController extends Controller
             'phone' => ['required', 'string', 'max:255'],
             'note' => ['nullable', 'string'],
         ]);
+
+        // 宿泊人数を自動計算
+        $validated['guest_count'] =
+            $validated['adult_count']
+            + ($validated['child_count'] ?? 0);
 
         // 予約番号自動生成
         $validated['reservation_number']
@@ -261,8 +252,10 @@ class BookingController extends Controller
             $dailyPrice * $days;
 
         return response()->json([
-            'days'=>$days,
-            'price'=>$totalPrice
+            'days' => $days,
+            'price' => $totalPrice,
+            'adult_price' => $room->adult_price,
+            'child_price' => $room->child_price,
         ]);
     }
 }

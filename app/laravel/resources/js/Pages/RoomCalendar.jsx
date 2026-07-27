@@ -13,26 +13,54 @@ export default function RoomCalendar({
     // 表示開始日
     const [startDate, setStartDate] = useState(new Date());
 
+    // 表示モード
+    const [viewMode, setViewMode] = useState('week');
+
     // 日付生成
     const dates = useMemo(() => {
-        return Array.from({ length: 7 }, (_, index) => {
-            const date = new Date(startDate);
-            date.setDate(date.getDate() + index);
+
+        if (viewMode === 'week') {
+            return Array.from({ length: 7 }, (_, i) => {
+
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+
+                return date.toISOString().split('T')[0];
+            });
+        }
+
+        // 月表示
+        const year = startDate.getFullYear();
+        const month = startDate.getMonth();
+        const lastDay = new Date(year, month + 1, 0).getDate();
+
+        return Array.from({ length: lastDay }, (_, i) => {
+
+            const date = new Date(year, month, i + 1);
             return date.toISOString().split('T')[0];
         });
-    }, [startDate]);
+    }, [startDate, viewMode]);
 
-    // 週切替
-    const changeWeek = (days) => {
+
+    // 週・月切替
+    const changePeriod = (direction) => {
+
         const newDate = new Date(startDate);
-        newDate.setDate(newDate.getDate() + days);
+        if (viewMode === 'week') {
+            newDate.setDate(newDate.getDate() + direction * 7);
+        } else {
+            newDate.setMonth(newDate.getMonth() + direction);
+        }
+
         setStartDate(newDate);
     };
+
 
     // 今日へ戻る
     const goToday = () => {
         setStartDate(new Date());
     };
+
 
     // 日付表示
     const formatDate = (dateString) => {
@@ -41,12 +69,14 @@ export default function RoomCalendar({
         return `${date.getMonth() + 1}/${date.getDate()}`;
     };
 
+
     // 曜日表示
     const getWeekday = (dateString) => {
         const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
 
         return weekdays[new Date(dateString).getDay()];
     };
+
 
     // ステータス色
     const statusColors = {
@@ -59,6 +89,7 @@ export default function RoomCalendar({
         9: 'bg-red-200',
     };
 
+
     // ステータス名
     const statusLabels = {
         1: '予約済み',
@@ -70,6 +101,7 @@ export default function RoomCalendar({
         9: 'キャンセル',
     };
 
+
     // 予約検索
     const findReservation = (roomId, date) => {
         return reservations.find((reservation) => {
@@ -80,6 +112,7 @@ export default function RoomCalendar({
             );
         });
     };
+
 
     // モーダル管理
     const [selectedReservation, setSelectedReservation] = useState(null);
@@ -93,13 +126,15 @@ export default function RoomCalendar({
         setSelectedDate(date);
     };
 
+
     // 再取得
     const refreshReservations = () => {
         router.get(
             route('room.calendar'),
             {
                 start_date: dates[0],
-                end_date: dates[6],
+                end_date: dates[dates.length - 1],
+                view: viewMode,
             },
             {
                 preserveState: true,
@@ -108,32 +143,33 @@ export default function RoomCalendar({
         );
     };
 
+
     return (
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                <h2 className="text-lg font-semibold leading-tight text-gray-800">
                     部屋状況
                 </h2>
             }
         >
             <Head title="部屋状況" />
 
-            <div className="py-8 bg-gray-50 min-h-screen">
+            <div className="h-[calc(100vh-90px)] bg-gray-100 p-5 flex flex-col">
                 <div className="mx-auto max-w-7xl px-6">
 
                     {/* タイトル */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold">
+                    <div className="mb-4">
+                        <h1 className="text-2xl font-bold">
                             部屋状況
                         </h1>
-                        <p className="mt-2 text-gray-500">
+                        <p className="text-xs text-gray-500">
                             部屋ごとの予約状況を週表示・月表示で確認できます。
                         </p>
                     </div>
 
                     {/* 表示期間カード */}
-                    <div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
+                    <div className="mb-4 rounded-2xl border bg-white px-5 py-3 shadow-sm">
                         <div className="flex items-center justify-between">
 
                             {/* 左 */}
@@ -143,64 +179,72 @@ export default function RoomCalendar({
                                 </div>
 
                                 <div className="mt-2 text-3xl font-bold">
-                                    {formatDate(dates[0])} ～ {formatDate(dates[6])}
+                                    {formatDate(dates[0])} ～ {formatDate(dates[dates.length - 1])}
                                 </div>
                             </div>
 
                             {/* 中央 */}
                             <div className="flex gap-3">
                                 <button
-                                    onClick={() => changeWeek(-7)}
-                                    className="rounded-lg border px-5 py-2 hover:bg-gray-100"
+                                    onClick={() => changePeriod(-1)}
+                                    className="rounded-lg border px-4 py-2 hover:bg-gray-100"
                                 >
                                     前へ
                                 </button>
 
                                 <button
                                     onClick={goToday}
-                                    className="rounded-lg border px-5 py-2 hover:bg-gray-100"
+                                    className="rounded-lg border px-4 py-2 hover:bg-gray-100"
                                 >
                                     今日へ戻る
                                 </button>
 
                                 <button
-                                    onClick={() => changeWeek(7)}
-                                    className="rounded-lg border px-5 py-2 hover:bg-gray-100"
+                                    onClick={() => changePeriod(1)}
+                                    className="rounded-lg border px-4 py-2 hover:bg-gray-100"
                                 >
                                     次へ
                                 </button>
-
                             </div>
 
                             {/* 右 */}
                             <div className="flex gap-2">
-
-                                <button className="rounded-lg bg-black px-5 py-2 text-white">
+                                <button
+                                    onClick={() => setViewMode('week')}
+                                    className={`rounded-lg px-4 py-2 ${
+                                        viewMode === 'week'
+                                            ? 'bg-black text-white'
+                                            : 'border hover:bg-gray-100'
+                                    }`}
+                                >
                                     週表示
                                 </button>
 
-                                <button className="rounded-lg border px-5 py-2">
+                                <button
+                                    onClick={() => setViewMode('month')}
+                                    className={`rounded-lg px-4 py-2 ${
+                                        viewMode === 'month'
+                                            ? 'bg-black text-white'
+                                            : 'border hover:bg-gray-100'
+                                    }`}
+                                >
                                     月表示
                                 </button>
-
                             </div>
-
                         </div>
-
                     </div>
 
                     {/* カレンダーカード */}
-                    <div className="rounded-2xl border bg-white shadow-sm">
-
+                    <div className="flex flex-col flex-1 rounded-2xl border bg-white shadow-sm overflow-hidden">
                         <div className="border-b p-5">
 
-                            <h2 className="text-xl font-semibold">
+                            <h2 className="text-lg font-semibold">
                                 予約状況（{formatDate(dates[0])} ～ {formatDate(dates[6])}）
                             </h2>
 
                         </div>
 
-                        <div className="overflow-x-auto">
+                        <div className="flex-1 overflow-auto">
                             <table className="min-w-full border-collapse">
                                 <thead>
                                     <tr>
@@ -213,7 +257,7 @@ export default function RoomCalendar({
                                             return (
                                                 <th
                                                     key={date}
-                                                    className={`min-w-[120px] border-b border-r p-4 text-center
+                                                    className={`w-28 border-b border-r py-2 px-2 text-center
                                                         ${day === 0 ? 'bg-red-50' : ''}
                                                         ${day === 6 ? 'bg-blue-50' : ''}
                                                     `}
@@ -256,11 +300,11 @@ export default function RoomCalendar({
 
                                                         <div>
 
-                                                            <div className="text-xl font-semibold">
+                                                            <div className="text-lg font-semibold">
                                                                 {room.room_number}
                                                             </div>
 
-                                                            <div className="mt-1 text-gray-500">
+                                                            <div className="text-xs text-gray-500">
                                                                 {room.name}
                                                             </div>
 
@@ -284,7 +328,7 @@ export default function RoomCalendar({
                                                 {dates.map((date) => (
                                                     <td
                                                         key={`${room.id}-${date}`}
-                                                        className="h-24 border-r border-b cursor-pointer hover:bg-gray-100"
+                                                        className="h-16 border-r border-b cursor-pointer hover:bg-gray-100"
                                                         onClick={() => {
                                                             const reservation =
                                                                 findReservation(
@@ -341,7 +385,7 @@ export default function RoomCalendar({
                     </div>
 
                     {/* ステータス凡例 */}
-                    <div className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
+                    <div className="mt-4 rounded-2xl border bg-white px-5 py-3 shadow-sm">
                         <h2 className="mb-5 text-lg font-semibold">
                             ステータス凡例
                         </h2>
@@ -351,7 +395,7 @@ export default function RoomCalendar({
                                 ([status, label]) => (
                                     <span
                                         key={status}
-                                        className={`rounded-full px-4 py-2 text-sm font-medium ${statusColors[status]}`}
+                                        className={`rounded-full px-3 py-1 text-sm font-medium ${statusColors[status]}`}
                                     >
                                         {label}
                                     </span>

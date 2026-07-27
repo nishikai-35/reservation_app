@@ -30,7 +30,7 @@ class DashboardController extends Controller
         $stayingReservations = Reservation::with('room')
             ->where('checkin_date', '<=', $today)
             ->where('checkout_date', '>', $today)
-            ->whereNotIn('status', [5, 9])
+            ->whereNotIn('status', [2, 3, 4])
             ->orderBy('room_id')
             ->get();
 

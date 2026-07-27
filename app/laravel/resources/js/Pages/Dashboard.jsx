@@ -77,10 +77,6 @@ export default function Dashboard({
                     <thead className="bg-gray-100">
                         <tr>
                             <th className="px-4 py-3 text-left text-sm font-semibold">
-                                予約番号
-                            </th>
-
-                            <th className="px-4 py-3 text-left text-sm font-semibold">
                                 宿泊者名
                             </th>
 
@@ -89,14 +85,10 @@ export default function Dashboard({
                             </th>
 
                             <th className="px-4 py-3 text-center text-sm font-semibold">
-                                人数
-                            </th>
-
-                            <th className="px-4 py-3 text-center text-sm font-semibold">
                                 {dateLabel}
                             </th>
 
-                            <th className="px-4 py-3 text-center text-sm font-semibold">
+                            <th className="w-28 px-4 py-3 text-center">
                                 ステータス
                             </th>
 
@@ -128,11 +120,6 @@ export default function Dashboard({
                                     className="cursor-pointer border-t transition hover:bg-gray-50"
                                 >
 
-                                    {/* 予約番号 */}
-                                    <td className="px-4 py-4">
-                                        {reservation.reservation_number}
-                                    </td>
-
                                     {/* 宿泊者 */}
                                     <td className="px-4 py-4 font-medium">
                                         {reservation.guest_name}
@@ -148,25 +135,19 @@ export default function Dashboard({
                                         </span>
                                     </td>
 
-                                    {/* 人数 */}
-                                    <td className="px-4 py-4 text-center">
-                                        {reservation.guest_count}名
-                                    </td>
-
                                     {/* 日付 */}
-                                    <td className="px-4 py-4 text-center">
-                                        {dateLabel === 'チェックイン日'
+                                    <td className="px-4 py-4 text-center whitespace-nowrap">
+                                        {(dateLabel === 'チェックイン日'
                                             ? reservation.checkin_date
-                                            : reservation.checkout_date}
+                                            : reservation.checkout_date
+                                        )?.substring(0, 10)}
                                     </td>
 
                                     {/* ステータス */}
                                     <td className="px-4 py-4 text-center">
                                         <span
-                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                                                statusClasses[
-                                                    reservation.status
-                                                ]
+                                            className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${
+                                                statusClasses[reservation.status]
                                             }`}
                                         >
                                             {statusLabels[
@@ -189,7 +170,7 @@ export default function Dashboard({
                                                 );
 
                                             }}
-                                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                                            className="rounded-lg bg-blue-600 px-5 py-2 whitespace-nowrap text-sm font-medium text-white transition hover:bg-blue-700"
                                         >
                                             {actionLabel}
                                         </button>
@@ -249,7 +230,7 @@ export default function Dashboard({
                                 </div>
 
                                 <div className="mt-4 text-5xl font-bold text-gray-900">
-                                    5
+                                    {totalRooms}
                                 </div>
 
                                 <div className="mt-2 text-sm text-gray-500">
@@ -301,7 +282,7 @@ export default function Dashboard({
                         </div>
                     </div>
 
-                    <div className="mt-8 space-y-6">
+                    <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
                         <ReservationTable
                             title="本日のチェックイン予定"
                             reservations={checkinReservations}
@@ -317,6 +298,16 @@ export default function Dashboard({
                             actionLabel="チェックアウト済み"
                             actionStatus={5}
                         />
+
+                        <div className="col-span-2 rounded-xl bg-white shadow">
+                            <ReservationTable
+                                title="現在滞在中"
+                                reservations={stayingReservation}
+                                dateLabel="チェックアウト日"
+                                actionLabel="詳細"
+                                actionStatus={3}
+                            />
+                        </div>
 
                         <ReservationModal
                             reservation={selectedReservation}

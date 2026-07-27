@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 use Inertia\Inertia;
 
+
 // ログインルート
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -27,6 +28,7 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
 
 // ダッシュボードルート
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -67,12 +69,16 @@ Route::post(
 )->name('booking.store');
 
 
-// 料金計算処理ルート
+// 空室検索・料金計算(API)
+Route::post(
+    '/booking/search',
+    [BookingController::class, 'search']
+)->name('booking.search');
+
 Route::post(
     '/booking/calculate',
-    [BookingController::class,'calculatePrice']
-)
-->name('booking.calculate');
+    [BookingController::class, 'calculatePrice']
+)->name('booking.calculate');
 
 
 // 予約フォーム登録完了ルート
@@ -83,23 +89,14 @@ Route::get('/booking/complete', function () {
 })->name('booking.complete');
 
 
-// 空室確認ルート
-Route::post(
-    '/booking/search',
-    [BookingController::class,'search']
-)->name('booking.search');
-
-
 // 認証グループ(管理者)
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // usersルート
     Route::resource('users', UserController::class);
 
-    
     // roomsルート
     Route::resource('rooms', RoomController::class);
-
 
     // Analysisルート
     Route::get('/analysis', [AnalysisController::class, 'index'])
@@ -111,7 +108,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/analysis/daily', [AnalysisController::class, 'daily'])
         ->name('analysis.daily');
 
-    
     // インポートルート
     Route::get('/reservations/import', [ReservationImportController::class, 'index'])
         ->name('reservations.import');
@@ -128,7 +124,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
 
     // reservationsルート
     Route::get('/reservations', [ReservationController::class, 'index'])
@@ -148,7 +143,6 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])
         ->name('reservations.updateStatus');
-
 
     // Calendarルート
     Route::get('/room-calendar', [RoomCalendarController::class, 'index'])
