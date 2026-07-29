@@ -16,45 +16,101 @@ class BookingComImporter
             throw new \Exception('CSVを開けません。');
         }
 
-        // ヘッダー取得（1行目）
+
+        // CSV文字コード確認
+        $content = file_get_contents($path);
+        $encoding = mb_detect_encoding(
+            $content,
+            ['UTF-8', 'SJIS-win', 'CP932', 'EUC-JP'],
+            true
+        );
+
+
+        // ヘッダー取得
         $header = fgetcsv($handle);
         if ($header === false) {
-            throw new \Exception('CSVヘッダーが取得できません。');
+            fclose($handle);
+
+            throw new \Exception(
+                'CSVヘッダーが取得できません。'
+            );
         }
 
-        // BOM除去・前後空白除去
-        $header = array_map(function ($value) {
-            return preg_replace('/^\xEF\xBB\xBF/', '', trim($value));
+
+        // BOM除去・文字コード変換
+        $header = array_map(function ($value) use ($encoding) {
+            $value = mb_convert_encoding(
+                $value,
+                'UTF-8',
+                $encoding
+            );
+
+            return preg_replace(
+                '/^\xEF\xBB\xBF/',
+                '',
+                trim($value)
+            );
         }, $header);
 
-
         DB::beginTransaction();
+
+
+        // インポート成功件数
+        $count = 0;
 
         try {
             while (($row = fgetcsv($handle)) !== false) {
 
-                // 空行はスキップ
-                if (count($header) !== count($row)) {
+                // 空行・列数違いスキップ
+                if (
+                    empty($row) ||
+                    count($header) !== count($row)
+                ) {
                     continue;
                 }
 
-                // ヘッダーとデータを結合
-                $row = array_combine($header, $row);
+                // 文字コード変換
+                $row = array_map(function ($value) use ($encoding) {
+                    return trim(
+                        mb_convert_encoding(
+                            $value,
+                            'UTF-8',
+                            $encoding
+                        )
+                    );
 
-                // 複数部屋の予約はスキップ
-                if (str_contains($row['ユニットタイプ'], ',')) {
+                }, $row);
+
+                // ヘッダーと結合
+                $row = array_combine(
+                    $header,
+                    $row
+                );
+
+                // 複数部屋予約は対象外
+                if (
+                    str_contains(
+                        $row['ユニットタイプ'],
+                        ','
+                    )
+                ) {
                     continue;
                 }
 
-                // バリデーション
-                $roomId = $this->getRoomId($row['ユニットタイプ']);
+                // 部屋存在確認
+                $roomId = $this->getRoomId(
+                    $row['ユニットタイプ']
+                );
+
                 if ($roomId === null) {
+
                     throw new \Exception(
-                        '部屋が存在しません: ' . $row['ユニットタイプ']
+                        '部屋が存在しません: '
+                        . $row['ユニットタイプ']
                     );
                 }
-    
-                // DB用に変換
+
+                // DB登録用データ
                 $data = [
                     'reservation_number' => $row['予約番号'],
                     'reservation_name' => $row['宿泊者氏名'],
@@ -72,26 +128,31 @@ class BookingComImporter
                     'payment_status' => '0',
                 ];
 
-                // Reservation登録
+                // 登録・更新
                 Reservation::updateOrCreate(
                     [
                         'reservation_number' => $data['reservation_number'],
                     ],
                     $data
                 );
-    
-                // 動作確認
-                // dd($row);
+
+                // 登録成功後に加算
+                $count++;
             }
+            
             DB::commit();
 
         } catch (\Exception $e) {
 
             DB::rollBack();
+            fclose($handle);
             throw $e;
         }
-
+        
         fclose($handle);
+
+        // インポート件数を返却
+        return $count;
     }
 
 

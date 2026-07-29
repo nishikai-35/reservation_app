@@ -1,20 +1,64 @@
-import { useState } from "react";
-import { Head, useForm } from "@inertiajs/react";
+import { useState, useEffect } from "react";
+import { Head, useForm, usePage } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 export default function Import({ auth }) {
-    const { data, setData, post, processing, errors, progress } = useForm({
+
+    const { flash } = usePage().props;
+
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        errors,
+        progress
+    } = useForm({
         csv: null,
     });
 
     const [fileName, setFileName] = useState("");
+    const [message, setMessage] = useState(null);
+    const [messageType, setMessageType] = useState(null);
+
+    // Flashメッセージ表示
+    useEffect(() => {
+        if (flash?.success) {
+
+            setMessage(flash.success);
+            setMessageType("success");
+
+        }
+
+        if (flash?.error) {
+
+            setMessage(flash.error);
+            setMessageType("error");
+
+        }
+
+        if (flash?.success || flash?.error) {
+
+            const timer = setTimeout(() => {
+
+                setMessage(null);
+                setMessageType(null);
+
+            }, 10000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
 
     const submit = (e) => {
         e.preventDefault();
 
-        post(route("reservations.import.store"), {
-            forceFormData: true,
-        });
+        post(
+            route("reservations.import.store"),
+            {
+                forceFormData: true,
+            }
+        );
     };
 
     return (
@@ -27,15 +71,39 @@ export default function Import({ auth }) {
             }
         >
             <Head title="CSVインポート" />
-
             <div className="py-8">
                 <div className="mx-auto max-w-3xl">
                     <div className="bg-white shadow rounded-lg p-6">
 
+                        {/* Flashメッセージ */}
+                        {message && (
+                            <div
+                                className={`
+                                    mb-6
+                                    rounded-lg
+                                    border
+                                    px-4
+                                    py-3
+                                    text-sm
+                                    ${
+                                        messageType === "success"
+                                            ? "border-green-200 bg-green-50 text-green-700"
+                                            : "border-red-200 bg-red-50 text-red-700"
+                                    }
+                                `}
+                            >
+                                {messageType === "success"
+                                    ? "✓ "
+                                    : "× "
+                                }
+                                {message}
+                            </div>
+                        )}
+
                         <form onSubmit={submit}>
                             <div className="mb-6">
-                                <label className="block mb-2 text-sm font-medium">
-                                    CSVファイル
+                                <label className="block mb-2 text-lg font-medium">
+                                    CSVファイルインポート
                                 </label>
 
                                 <p className="mt-1 mb-6 text-sm text-gray-600">
@@ -46,10 +114,24 @@ export default function Import({ auth }) {
                                     type="file"
                                     accept=".csv"
                                     onChange={(e) => {
-                                        setData("csv", e.target.files[0]);
-                                        setFileName(e.target.files[0]?.name);
+
+                                        setData(
+                                            "csv",
+                                            e.target.files[0]
+                                        );
+
+                                        setFileName(
+                                            e.target.files[0]?.name ?? ""
+                                        );
                                     }}
-                                    className="block w-full border rounded p-2"
+
+                                    className="
+                                        block
+                                        w-full
+                                        border
+                                        rounded
+                                        p-2
+                                    "
                                 />
 
                                 {fileName && (
@@ -69,7 +151,13 @@ export default function Import({ auth }) {
                                 <div className="mb-4">
                                     <div className="w-full bg-gray-200 rounded">
                                         <div
-                                            className="bg-blue-600 text-xs text-white text-center rounded"
+                                            className="
+                                                bg-blue-600
+                                                text-xs
+                                                text-white
+                                                text-center
+                                                rounded
+                                            "
                                             style={{
                                                 width: `${progress.percentage}%`,
                                             }}
@@ -83,12 +171,22 @@ export default function Import({ auth }) {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded"
+                                className="
+                                    bg-blue-600
+                                    hover:bg-blue-700
+                                    disabled:bg-gray-400
+                                    text-white
+                                    px-5
+                                    py-2
+                                    rounded
+                                "
                             >
-                                {processing ? "インポート中..." : "インポート開始"}
+                                {processing
+                                    ? "インポート中..."
+                                    : "インポート開始"
+                                }
                             </button>
                         </form>
-                        
                     </div>
                 </div>
             </div>

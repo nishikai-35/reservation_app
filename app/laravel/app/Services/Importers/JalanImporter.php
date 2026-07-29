@@ -17,17 +17,27 @@ class JalanImporter
         }
 
 
-        // ヘッダー取得（1行目）
+        // CSV文字コード確認
+        $content = file_get_contents($path);
+        $encoding = mb_detect_encoding(
+            $content,
+            ['CP932', 'SJIS-win', 'UTF-8'],
+            true
+        );
+
+
+        // ヘッダー取得
         $header = null;
 
         while (($row = fgetcsv($handle)) !== false) {
+            $row = array_map(function ($value) use ($encoding) {
 
-            // Shift_JIS → UTF-8
-            $row = array_map(function ($value) {
-                return mb_convert_encoding(
-                    trim($value),
-                    'UTF-8',
-                    'SJIS-win'
+                return trim(
+                    mb_convert_encoding(
+                        $value,
+                        'UTF-8',
+                        $encoding
+                    )
                 );
             }, $row);
 
@@ -38,48 +48,79 @@ class JalanImporter
         }
 
         if ($header === null) {
-            throw new \Exception('CSVヘッダーが取得できません。');
+            fclose($handle);
+            throw new \Exception(
+                'CSVヘッダーが取得できません。'
+            );
         }
 
-
-        // BOM除去・前後空白除去
-        $header = array_map(function ($value) {
-            return preg_replace('/^\xEF\xBB\xBF/', '', trim($value));
+        // BOM除去・文字コード変換
+        $header = array_map(function ($value) use ($encoding) {
+            return preg_replace(
+                '/^\xEF\xBB\xBF/',
+                '',
+                trim($value)
+            );
         }, $header);
-
 
         DB::beginTransaction();
 
+
+        // インポート成功件数
+        $count = 0;
+        
         try {
             while (($row = fgetcsv($handle)) !== false) {
 
-                // UTF変換
-                $row = array_map(function ($value) {
-                    return mb_convert_encoding(
-                        trim($value),
-                        'UTF-8',
-                        'SJIS-win'
-                    );
-                }, $row);
-
-                // 空行はスキップ
-                if (count($header) !== count($row)) {
+                // 空行・列数違いスキップ
+                if (
+                    empty($row) ||
+                    count($header) !== count($row)
+                ) {
                     continue;
                 }
 
-                // ヘッダーとデータを結合
-                $row = array_combine($header, $row);
+                // 文字コード変換
+                $row = array_map(function ($value) use ($encoding) {
+                    return trim(
+                        mb_convert_encoding(
+                            $value,
+                            'UTF-8',
+                            $encoding
+                        )
+                    );
+                }, $row);
 
+                // ヘッダーと結合
+                $row = array_combine(
+                    $header,
+                    $row
+                );
 
-                // バリデーション
-                $roomId = $this->getRoomId($row['部屋タイプ名称']);
+                // 複数部屋予約は対象外
+                if (
+                    str_contains(
+                        $row['部屋タイプ名称'],
+                        ','
+                    )
+                ) {
+                    continue;
+                }
+
+                // 部屋存在確認
+                $roomId = $this->getRoomId(
+                    $row['部屋タイプ名称']
+                );
+
                 if ($roomId === null) {
+
                     throw new \Exception(
-                        '部屋が存在しません: ' . $row['部屋タイプ名称']
+                        '部屋が存在しません: '
+                        . $row['部屋タイプ名称']
                     );
                 }
     
-                // DB用に変換
+                // DB登録用データ
                 $data = [
                     'reservation_number' => $row['予約番号'],
                     'reservation_name' => 'じゃらん予約',
@@ -100,26 +141,31 @@ class JalanImporter
                     'status' => empty($row['キャンセル日']) ? 1 : 9,
                 ];
 
-                // Reservation登録
+                // 登録・更新
                 Reservation::updateOrCreate(
                     [
                         'reservation_number' => $data['reservation_number'],
                     ],
                     $data
                 );
-    
-                // 動作確認
-                // dd($header);
+
+                // 登録成功後に加算
+                $count++;
             }
+
             DB::commit();
 
         } catch (\Exception $e) {
 
             DB::rollBack();
+            fclose($handle);
             throw $e;
         }
-
+        
         fclose($handle);
+
+        // インポート件数を返却
+        return $count;
     }
 
 

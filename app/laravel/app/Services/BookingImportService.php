@@ -20,6 +20,15 @@ class BookingImportService
 
     public function import(string $path)
     {
+        // csvファイル文字コード確認
+        $content = file_get_contents($path);
+
+        $encoding = mb_detect_encoding(
+            $content,
+            ['UTF-8', 'SJIS-win', 'CP932', 'EUC-JP'],
+            true
+        );
+
         // CSVを開く
         $handle = fopen($path, 'r');
 
@@ -33,22 +42,34 @@ class BookingImportService
         while (($row = fgetcsv($handle)) !== false) {
 
             // Shift_JIS → UTF-8
-            $row = array_map(function ($value) {
-                return mb_convert_encoding(
-                    trim($value),
+            $row = array_map(function ($value) use ($encoding) {
+
+                $value = mb_convert_encoding(
+                    $value,
                     'UTF-8',
-                    'SJIS-win'
+                    $encoding
                 );
+
+                return trim(
+                    preg_replace(
+                        '/^\xEF\xBB\xBF/',
+                        '',
+                        $value
+                    )
+                );
+
             }, $row);
 
+
             if (in_array('予約番号', $row)) {
+
                 $header = $row;
                 break;
             }
         }
 
         if ($header === null) {
-            throw new \Exception('CSVヘッダーが取得できません。');
+            throw new \Exception('BookingImportService：CSVヘッダーが取得できません。');
         }
 
         // 動作確認（ヘッダー名　取得確認）
@@ -76,8 +97,7 @@ class BookingImportService
             in_array('ユニットタイプ', $header) &&
             in_array('予約番号', $header)
         ) {
-            $this->bookingImporter->import($path);
-            return;
+            return $this->bookingImporter->import($path);
         }
 
         // じゃらん
@@ -85,8 +105,7 @@ class BookingImportService
             in_array('部屋タイプ名称', $header) &&
             in_array('予約番号', $header)
         ) {
-            $this->jalanImporter->import($path);
-            return;
+            return $this->jalanImporter->import($path);
         }
 
         // 未対応CSV

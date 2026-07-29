@@ -10,19 +10,24 @@ class ReservationImportController extends Controller
 {
     private BookingImportService $bookingImportService;
 
+
     public function __construct(
         BookingImportService $bookingImportService
     ) {
         $this->bookingImportService = $bookingImportService;
     }
 
+
     /**
      * インポート画面
      */
     public function index()
     {
-        return Inertia::render('Reservations/Import');
+        return Inertia::render(
+            'Reservations/Import'
+        );
     }
+
 
     /**
      * CSVアップロード
@@ -30,7 +35,11 @@ class ReservationImportController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'csv' => ['required', 'file', 'mimes:csv,txt'],
+            'csv' => [
+                'required',
+                'file',
+                'mimes:csv,txt'
+            ],
         ]);
 
         $path = $request
@@ -38,19 +47,21 @@ class ReservationImportController extends Controller
             ->getRealPath();
 
         try {
-
-            $this->bookingImportService->import($path);
-
+            // インポート件数取得
+            $count = $this->bookingImportService->import(
+                $path
+            );
         } catch (\Exception $e) {
 
-            return back()->withErrors([
-                'csv' => $e->getMessage(),
-            ]);
+            return back()->with(
+                'error',
+                $e->getMessage()
+            );
         }
 
         return back()->with(
             'success',
-            'インポートが完了しました。'
+            "{$count}件の予約をインポートしました。"
         );
     }
 }
