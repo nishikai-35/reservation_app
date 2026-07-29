@@ -15,14 +15,14 @@ class DashboardController extends Controller
         // 本日チェックイン
         $checkinReservations = Reservation::with('room')
             ->whereDate('checkin_date', $today)
-            ->whereNotIn('status', [5, 9])
+            ->whereIn('status', [1])
             ->orderBy('checkin_date')
             ->get();
 
         // 本日チェックアウト
         $checkoutReservations = Reservation::with('room')
             ->whereDate('checkout_date', $today)
-            ->whereNotIn('status', [5, 9])
+            ->whereIn('status', [1, 2, 3, 4])
             ->orderBy('checkout_date')
             ->get();
 
@@ -30,7 +30,7 @@ class DashboardController extends Controller
         $stayingReservations = Reservation::with('room')
             ->where('checkin_date', '<=', $today)
             ->where('checkout_date', '>', $today)
-            ->whereNotIn('status', [2, 3, 4])
+            ->whereIn('status', [2, 3, 4])
             ->orderBy('room_id')
             ->get();
 
@@ -43,6 +43,7 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', [
 
             'today' => $today,
+            'rooms' => Room::orderBy('room_number')->get(),
             'totalRooms' => $totalRooms,
             'todayCheckinCount' => $todayCheckinCount,
             'todayCheckoutCount' => $todayCheckoutCount,

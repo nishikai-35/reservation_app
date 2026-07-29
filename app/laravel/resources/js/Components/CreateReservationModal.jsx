@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 
 export default function ReservationCreateModal({
+    reservation = null,
     room = null,
     rooms = [],
     date = '',
@@ -130,8 +131,6 @@ export default function ReservationCreateModal({
     ]);
 
 
-
-
     // 泊数計算
     const stayNights = useMemo(() => {
 
@@ -210,18 +209,21 @@ export default function ReservationCreateModal({
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('reservations.store'), {
-            preserveScroll: true,
-
-            onSuccess: () => {
-                refreshReservations?.();
-                onClose();
-            },
-
-            onError: (errors) => {
-                console.log(errors);
-            },
-        });
+        if (reservation) {
+            put(route('reservations.update', reservation.id), {
+                onSuccess: () => {
+                    refreshReservations();
+                    onClose();
+                },
+            });
+        } else {
+            post(route('reservations.store'), {
+                onSuccess: () => {
+                    refreshReservations();
+                    onClose();
+                },
+            });
+        }
     };
 
 
@@ -414,24 +416,30 @@ export default function ReservationCreateModal({
                                     <select
                                         value={data.room_id}
                                         onChange={(e) =>
-                                            setData(
-                                                'room_id',
-                                                e.target.value
-                                            )
+                                            setData('room_id', e.target.value)
                                         }
-                                        className="w-full rounded-lg border px-4 py-3"
+                                        disabled={
+                                            !data.checkin_date ||
+                                            !data.checkout_date
+                                        }
+                                        className={`w-full rounded-lg border px-4 py-3 ${
+                                            !data.checkin_date || !data.checkout_date
+                                                ? 'cursor-not-allowed bg-gray-100 text-gray-400'
+                                                : ''
+                                        }`}
                                     >
                                         <option value="">
-                                            部屋を選択してください
+                                            {!data.checkin_date || !data.checkout_date
+                                                ? '先にチェックイン・アウト日を選択'
+                                                : '部屋を選択してください'}
                                         </option>
+                                            
                                         {availableRooms.map((roomItem) => (
                                             <option
                                                 key={roomItem.id}
                                                 value={roomItem.id}
                                             >
-                                                {roomItem.room_number}
-                                                {' '}
-                                                {roomItem.name}
+                                                {roomItem.room_number} {roomItem.name}
                                             </option>
                                         ))}
                                     </select>

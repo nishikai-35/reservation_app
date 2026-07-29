@@ -1,11 +1,13 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import CreateReservationModal from '@/Components/CreateReservationModal';
+
 import { Head, router, usePage } from '@inertiajs/react';
-import ReservationModal from '@/Components/ReservationModal';
 import { useState } from 'react';
 
 
 export default function Dashboard({
     auth,
+    rooms = [],
     today,
     totalRooms,
     todayCheckinCount,
@@ -13,7 +15,7 @@ export default function Dashboard({
     stayingCount,
     checkinReservations = [],
     checkoutReservations = [],
-    stayingReservation = [],
+    stayingReservations = [],
     
 }) {
     const statusLabels = {
@@ -26,6 +28,7 @@ export default function Dashboard({
         9: 'キャンセル',
     };
 
+
     // ステータス色分け
     const statusClasses = {
         1: 'bg-blue-100 text-blue-800',
@@ -37,6 +40,7 @@ export default function Dashboard({
         9: 'bg-red-100 text-red-800',
     };
 
+
     // ステータス更新関数
     const updateStatus = (reservationId, status) => {
         router.patch(route('reservations.updateStatus', reservationId), {
@@ -44,11 +48,12 @@ export default function Dashboard({
         });
     };
 
-    // 予約詳細モーダルの表示状態を管理
+
+    // モーダルの表示状態を管理
     const [selectedReservation, setSelectedReservation] = useState(null);
-
-
     const { auth: pageAuth } = usePage().props;
+    const [showCreateModal, setShowCreateModal] = useState(false);
+
 
     // role情報確認用
     console.log(pageAuth);
@@ -187,11 +192,11 @@ export default function Dashboard({
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    ダッシュボード
-                </h2>
-            }
+            // header={
+            //     <h2 className="text-xl font-semibold leading-tight text-gray-800">
+            //         ダッシュボード
+            //     </h2>
+            // }
         >
             <Head title="ダッシュボード" />
 
@@ -213,9 +218,7 @@ export default function Dashboard({
 
                             <button
                                 type="button"
-                                onClick={() =>
-                                    router.visit(route('reservations.index'))
-                                }
+                                onClick={() => setShowCreateModal(true)}
                                 className="rounded-lg bg-gray-900 px-6 py-3 font-semibold text-white transition hover:bg-black"
                             >
                                 新規登録
@@ -302,17 +305,22 @@ export default function Dashboard({
                         <div className="col-span-2 rounded-xl bg-white shadow">
                             <ReservationTable
                                 title="現在滞在中"
-                                reservations={stayingReservation}
+                                reservations={stayingReservations}
                                 dateLabel="チェックアウト日"
                                 actionLabel="詳細"
                                 actionStatus={3}
                             />
                         </div>
 
-                        <ReservationModal
-                            reservation={selectedReservation}
-                            onClose={() => setSelectedReservation(null)}
-                        />
+                        {showCreateModal && (
+                            <CreateReservationModal
+                                room={null}
+                                rooms={rooms}
+                                date={null}
+                                refreshReservations={() => router.reload()}
+                                onClose={() => setShowCreateModal(false)}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

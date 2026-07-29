@@ -117,14 +117,14 @@ export default function Index({ auth, reservations, rooms = [] }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={
-                <h2 className="text-xl font-semibold text-gray-800">
-                    予約管理
-                </h2>
-            }
+            // header={
+            //     <h2 className="text-xl font-semibold text-gray-800">
+            //         予約管理
+            //     </h2>
+            // }
         >
             <Head title="予約管理" />
-            <div className="h-[calc(100vh-90px)] bg-gray-100 p-6 flex flex-col">
+            <div className="min-h-[calc(100vh-90px)] bg-gray-100 p-6 flex flex-col">
                 <div className="mx-auto max-w-7xl px-6">
                     <div className="mb-8">
 

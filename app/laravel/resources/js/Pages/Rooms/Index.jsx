@@ -16,7 +16,7 @@ export default function Index({ auth, rooms }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2>部屋マスター</h2>}
+            // header={<h2>部屋マスター</h2>}
         >
             <Head title="部屋マスター" />
 

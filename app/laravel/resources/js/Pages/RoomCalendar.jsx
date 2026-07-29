@@ -1,9 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import CreateReservationModal from '@/Components/CreateReservationModal';
+import ReservationBar from '@/Components/Calendar/ReservationBar';
+
+
 import { Head, router } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
-import ReservationModal from '@/Components/ReservationModal';
-import CreateReservationModal from '@/Components/CreateReservationModal';
-import EditReservationModal from '@/Components/EditReservationModal';
 
 export default function RoomCalendar({
     auth,
@@ -11,7 +12,13 @@ export default function RoomCalendar({
     reservations = [],
 }) {
     // 表示開始日
-    const [startDate, setStartDate] = useState(new Date());
+    const today = new Date();
+    today.setDate(
+        today.getDate() - today.getDay()
+    );
+
+    const [startDate,setStartDate]=useState(today);
+    
 
     // 表示モード
     const [viewMode, setViewMode] = useState('week');
@@ -78,6 +85,17 @@ export default function RoomCalendar({
     };
 
 
+    // 拍数計算
+    const getStayDays = (reservation) => {
+        const start = new Date(reservation.checkin_date);
+        const end = new Date(reservation.checkout_date);
+
+        return Math.ceil(
+            (end - start) / (1000 * 60 * 60 * 24)
+        );
+    };
+
+
     // ステータス色
     const statusColors = {
         1: 'bg-blue-200',
@@ -101,29 +119,80 @@ export default function RoomCalendar({
         9: 'キャンセル',
     };
 
+    // 宿泊者表示セル幅
+    const CELL_WIDTH = 112;
+
 
     // 予約検索
     const findReservation = (roomId, date) => {
         return reservations.find((reservation) => {
+
+            const checkin = reservation.checkin_date.substring(0, 10);
+            const checkout = reservation.checkout_date.substring(0, 10);
+
             return (
                 reservation.room_id === roomId &&
-                date >= reservation.checkin_date &&
-                date < reservation.checkout_date
+                date >= checkin &&
+                date < checkout
             );
         });
     };
 
+    const getReservationWidth = (reservation)=>{
+
+        const checkin = new Date(
+            reservation.checkin_date.substring(0,10)
+        );
+
+        const checkout = new Date(
+            reservation.checkout_date.substring(0,10)
+        );
+
+        const viewStart = new Date(dates[0]);
+        const viewEnd = new Date(dates[dates.length-1]);
+
+        const start =
+            checkin < viewStart ? viewStart : checkin;
+
+        const end =
+            checkout > viewEnd ? viewEnd : checkout;
+
+        const nights = Math.ceil(
+            (end-start)/(1000*60*60*24)
+        );
+
+        return nights * CELL_WIDTH;
+    };
+
+    const getReservationLeft = (reservation)=>{
+        const checkin =
+            reservation.checkin_date.substring(0,10);
+        
+        const index =
+            dates.findIndex(
+                date=>date===checkin
+            );
+
+        if(index >= 0){
+            return index * CELL_WIDTH;
+        }
+
+        return 0;
+    };
+
 
     // モーダル管理
-    const [selectedReservation, setSelectedReservation] = useState(null);
-    const [editingReservation, setEditingReservation] = useState(null);
+    const [showReservationModal, setShowReservationModal] = useState(false);
 
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedReservation, setSelectedReservation] = useState(null);
 
     const openCreateModal = (room, date) => {
+        setSelectedReservation(null);
         setSelectedRoom(room);
         setSelectedDate(date);
+        setShowReservationModal(true);
     };
 
 
@@ -147,11 +216,6 @@ export default function RoomCalendar({
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={
-                <h2 className="text-lg font-semibold leading-tight text-gray-800">
-                    部屋状況
-                </h2>
-            }
         >
             <Head title="部屋状況" />
 
@@ -235,154 +299,107 @@ export default function RoomCalendar({
                     </div>
 
                     {/* カレンダーカード */}
-                    <div className="flex flex-col flex-1 rounded-2xl border bg-white shadow-sm overflow-hidden">
-                        <div className="border-b p-5">
+                    <div className="flex flex-col flex-1 rounded-2xl border bg-white shadow-sm overflow-visible">
 
+                        <div className="border-b p-5">
                             <h2 className="text-lg font-semibold">
                                 予約状況（{formatDate(dates[0])} ～ {formatDate(dates[6])}）
                             </h2>
-
                         </div>
 
-                        <div className="flex-1 overflow-auto">
-                            <table className="min-w-full border-collapse">
-                                <thead>
-                                    <tr>
-                                        <th className="w-56 border-b border-r p-4 text-left text-lg font-semibold">
-                                            部屋
-                                        </th>
+                        <div className="overflow-x-auto">
+                            <div className="min-w-max">
 
-                                        {dates.map((date) => {
-                                            const day = new Date(date).getDay();
-                                            return (
-                                                <th
+                                {/* 日付ヘッダー */}
+                                <div className="flex">
+                                    <div className="w-[200px] shrink-0 border-b border-r p-4 font-semibold">
+                                        部屋
+                                    </div>
+
+                                    {dates.map(date => (
+                                        <div key={date} style={{width:CELL_WIDTH}} className="border-b border-r p-2 text-center">
+                                            <div>{formatDate(date)}</div>
+                                            <div className="text-xs text-gray-500">{getWeekday(date)}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                {/* 部屋行 */}
+                                {rooms.map(room => (
+                                    <div key={room.id} className="flex border-b">
+                                
+                                        {/* 部屋情報 */}
+                                        <div className="w-[200px] shrink-0 border-r p-4 relative">
+                                            <div className="font-semibold">
+                                                {room.room_number}
+                                            </div>
+                                
+                                            <div className="text-xs text-gray-500">
+                                                {room.name}
+                                            </div>
+                                
+                                            <button
+                                                onClick={()=>openCreateModal(room,dates[0])}
+                                                className="absolute right-3 top-3 border rounded px-2"
+                                            >
+                                                ＋
+                                            </button>
+                                        </div>
+                                
+                                        {/* タイムライン */}
+                                        <div
+                                            className="relative h-20"
+                                            style={{width:dates.length * CELL_WIDTH}}
+                                        >
+                                        
+                                            {/* 日付線 */}
+                                            {dates.map((date,index)=>(
+                                                <div
                                                     key={date}
-                                                    className={`w-28 border-b border-r py-2 px-2 text-center
-                                                        ${day === 0 ? 'bg-red-50' : ''}
-                                                        ${day === 6 ? 'bg-blue-50' : ''}
-                                                    `}
-                                                >
+                                                    className="absolute top-0 bottom-0 border-r"
+                                                    style={{left:index * CELL_WIDTH}}
+                                                />
+                                            ))}
+                                        
+                                            {/* 予約バー */}
+                                            {reservations
+                                                .filter(reservation=>{
+                                                    if(reservation.room_id !== room.id) return false;
 
-                                                    <div className="font-semibold">
-                                                        {formatDate(date)}
-                                                    </div>
+                                                    const checkin = reservation.checkin_date.substring(0,10);
+                                                    const checkout = reservation.checkout_date.substring(0,10);
+                                                    const viewStart = dates[0];
+                                                    const viewEnd = dates[dates.length - 1];
 
-                                                    <div className="mt-2 text-sm text-gray-500">
-                                                        {getWeekday(date)}
-                                                    </div>
+                                                    return (
+                                                        checkin <= viewEnd &&
+                                                        checkout > viewStart
+                                                    );
+                                                })
 
-                                                </th>
-                                            );
-                                        })}
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {rooms.length === 0 ? (
-                                        <tr>
-                                            <td
-                                                colSpan={dates.length + 1}
-                                                className="p-8 text-center text-gray-500"
-                                            >
-                                                部屋データがありません
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        rooms.map((room) => (
-                                            <tr
-                                                key={room.id}
-                                                className="hover:bg-gray-50"
-                                            >
-                                                {/* 部屋情報 */}
-                                                <td className="border-r border-b p-4 align-top">
-
-                                                    <div className="flex items-start justify-between">
-
-                                                        <div>
-
-                                                            <div className="text-lg font-semibold">
-                                                                {room.room_number}
-                                                            </div>
-
-                                                            <div className="text-xs text-gray-500">
-                                                                {room.name}
-                                                            </div>
-
-                                                        </div>
-
-                                                        <button
-                                                            onClick={() =>
-                                                                openCreateModal(
-                                                                    room,
-                                                                    dates[0]
-                                                                )
-                                                            }
-                                                            className="rounded-lg border px-3 py-1 text-sm hover:bg-gray-100"
-                                                        >
-                                                            ＋
-                                                        </button>
-                                                    </div>
-                                                </td>
-
-                                                {/* 日付セル */}
-                                                {dates.map((date) => (
-                                                    <td
-                                                        key={`${room.id}-${date}`}
-                                                        className="h-16 border-r border-b cursor-pointer hover:bg-gray-100"
-                                                        onClick={() => {
-                                                            const reservation =
-                                                                findReservation(
-                                                                    room.id,
-                                                                    date
-                                                                );
-
-                                                            if (!reservation) {
-                                                                openCreateModal(
-                                                                    room,
-                                                                    date
-                                                                );
-                                                            }
+                                                .map(reservation=>(
+                                                    <ReservationBar
+                                                        key={reservation.id}
+                                                        reservation={reservation}
+                                                        left={getReservationLeft(reservation)}
+                                                        width={getStayDays(reservation) * CELL_WIDTH}
+                                                        color={statusColors[reservation.status]}
+                                                        onClick={()=>{
+                                                            setSelectedReservation(reservation);
+                                                            setSelectedRoom(room);
+                                                            setSelectedDate(reservation.checkin_date);
+                                                            setShowReservationModal(true);
                                                         }}
-                                                    >
-                                                        {(() => {
-                                                            const reservation =
-                                                                findReservation(
-                                                                    room.id,
-                                                                    date
-                                                                );
-
-                                                            if (!reservation) {
-                                                                return null;
-                                                            }
-
-                                                            return (
-                                                                <div
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-
-                                                                        setSelectedReservation(
-                                                                            reservation
-                                                                        );
-                                                                    }}
-                                                                    className={`mx-1 rounded-lg p-2 text-xs font-medium transition hover:opacity-80 ${statusColors[reservation.status]}`}
-                                                                >
-                                                                    <div className="truncate">
-                                                                        {
-                                                                            reservation.guest_name
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })()}
-                                                    </td>
-                                                ))}
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                                    />
+                                                ))
+                                            }
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
+
 
                     {/* ステータス凡例 */}
                     <div className="mt-4 rounded-2xl border bg-white px-5 py-3 shadow-sm">
@@ -413,31 +430,12 @@ export default function RoomCalendar({
                     rooms={rooms}
                     date={selectedDate}
                     refreshReservations={refreshReservations}
-                    onClose={() => {
+                    onClose={() => { 
+                        setShowReservationModal(false);
+                        setSelectedReservation(null);
                         setSelectedRoom(null);
                         setSelectedDate(null);
                     }}
-                />
-            )}
-            {/* 予約詳細モーダル */}
-            {selectedReservation && (
-                <ReservationModal
-                    reservation={selectedReservation}
-                    onClose={() => setSelectedReservation(null)}
-                    onEdit={(reservation) => {
-                        setSelectedReservation(null);
-                        setEditingReservation(reservation);
-                    }}
-                />
-            )}
-            {/* 予約編集モーダル */}
-            {editingReservation && (
-                <EditReservationModal
-                    reservation={editingReservation}
-                    refreshReservations={refreshReservations}
-                    onClose={() =>
-                        setEditingReservation(null)
-                    }
                 />
             )}
         </AuthenticatedLayout>
