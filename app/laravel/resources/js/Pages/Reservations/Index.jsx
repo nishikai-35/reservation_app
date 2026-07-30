@@ -272,7 +272,7 @@ export default function Index({ auth, reservations, rooms = [] }) {
                                 
                                 <button
                                     type="submit"
-                                    className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                 >
                                     検索
                                 </button>
@@ -299,7 +299,7 @@ export default function Index({ auth, reservations, rooms = [] }) {
                             <button
                                 type="button"
                                 onClick={() => setShowCreateModal(true)}
-                                className="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
+                                className="rounded-lg bg-black px-5 py-3 font-medium text-white transition hover:bg-gray-800"
                             >
                                 新規登録
                             </button>
@@ -436,7 +436,7 @@ export default function Index({ auth, reservations, rooms = [] }) {
                                                                     'reservations.edit',
                                                                     reservation.id
                                                                 )}
-                                                                className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                                                                className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
                                                             >
                                                                 編集
                                                             </Link>
@@ -448,7 +448,7 @@ export default function Index({ auth, reservations, rooms = [] }) {
                                                                         reservation.id
                                                                     )
                                                                 }
-                                                                className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
+                                                                className="rounded bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
                                                             >
                                                                 削除
                                                             </button>

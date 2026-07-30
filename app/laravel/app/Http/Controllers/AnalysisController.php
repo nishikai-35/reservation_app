@@ -27,8 +27,12 @@ class AnalysisController extends Controller
         //売上合計
         $totalSales = $reservations->sum('amount');
 
-        //宿泊人数合計
-        $totalGuests = $reservations->sum('guest_count');
+        // 大人・子ども人数
+        $totalAdults = $reservations->sum('adult_count');
+        $totalChildren = $reservations->sum('child_count');
+
+        // 合計宿泊人数
+        $totalGuests = $totalAdults + $totalChildren;
 
         //予約件数
         $reservationCount = $reservations->count();
@@ -332,16 +336,15 @@ class AnalysisController extends Controller
                 'summary'=>[
                     'year'=>$year,
                     'month'=>$month,
-
                     'sales'=>$totalSales,
                     'guest_count' => $totalGuests,
+                    'adult_count' => $totalAdults,
+                    'child_count' => $totalChildren,
                     'reservation_count'=>$reservationCount,
                     'occupancy_rate'=>$occupancyRate,
                     'room_count'=>$roomCount,
                     'used_rooms' => $usedRoomDays,
                     'total_rooms' => $roomCount,
-                    'adult_count' => $reservations->sum('adult_count'),
-                    'child_count' => $reservations->sum('child_count'),
                 ],
 
                 'chartData' => collect($comparisonData)->map(function ($item) {

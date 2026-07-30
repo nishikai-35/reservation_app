@@ -40,6 +40,11 @@ class RoomController extends Controller
             'room_number' => ['required', 'unique:rooms'],
             'capacity_min' => ['required', 'integer'],
             'capacity_max' => ['required', 'integer'],
+            'adult_price' => ['required', 'integer', 'min:0'],
+            'child_price' => ['required', 'integer', 'min:0'],
+            'checkin_time' => ['required', 'date_format:H:i'],
+            'checkout_time' => ['required', 'date_format:H:i'],
+            'note' => ['nullable', 'string'],
         ]);
 
         Room::create($validated);
@@ -74,7 +79,6 @@ class RoomController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'max:255'],
-
             'room_number' => [
                 'required',
                 Rule::unique('rooms')->ignore($room->id),
@@ -82,6 +86,11 @@ class RoomController extends Controller
 
             'capacity_min' => ['required', 'integer'],
             'capacity_max' => ['required', 'integer'],
+            'adult_price' => ['required', 'integer', 'min:0'],
+            'child_price' => ['required', 'integer', 'min:0'],
+            'checkin_time' => ['required', 'date_format:H:i'],
+            'checkout_time' => ['required', 'date_format:H:i'],
+            'note' => ['nullable', 'string'],
         ]);
 
         $room->update($validated);

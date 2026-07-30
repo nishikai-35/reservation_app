@@ -156,7 +156,7 @@ export default function Index({ auth, users, flash, filters }) {
 
                             <Link
                                 href={route('users.create')}
-                                className="px-5 py-2 bg-gray-900 text-white rounded-lg hover:bg-black"
+                                className="rounded-lg bg-black px-5 py-3 font-medium text-white transition hover:bg-gray-800"
                             >
                                 新規登録
                             </Link>
@@ -207,57 +207,40 @@ export default function Index({ auth, users, flash, filters }) {
                                                 </td>
 
                                                 <td className="px-4 py-3">
-
                                                     <div className="flex justify-center gap-6">
-
                                                         <Link
                                                             href={route('users.edit', user.id)}
-                                                            className="text-blue-600 hover:underline"
+                                                            className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
                                                         >
                                                             編集
                                                         </Link>
 
                                                         <button
                                                             onClick={() => handleDelete(user.id)}
-                                                            className="text-red-600 hover:underline"
+                                                            className="rounded bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
                                                         >
                                                             削除
                                                         </button>
-
                                                     </div>
-
                                                 </td>
-
                                             </tr>
-
                                         ))
-
                                     ) : (
-
                                         <tr>
-
                                             <td
                                                 colSpan="5"
                                                 className="py-8 text-center text-gray-500"
                                             >
                                                 該当するユーザーがありません。
                                             </td>
-
                                         </tr>
-
                                     )}
-
                                 </tbody>
-
                             </table>
-
                         </div>
-
                     </div>
-
                 </div>
             </div>
-
         </AuthenticatedLayout>
     );
 }

@@ -145,19 +145,23 @@ export default function Analysis({
                         月別集計
                     ========================== */}
                     <div className="bg-white rounded-xl shadow border">
-                        <div className="p-6 border-b">
-                            <div className="flex items-end gap-4">
+                        <div className="p-6 border-b bg-gray-50 rounded-t-xl">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-5">
+                                集計条件
+                            </h3>
+
+                            <div className="flex items-end gap-5 flex-wrap">
 
                                 {/* 年 */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="mb-2 block text-sm font-semibold text-gray-700">
                                         年
                                     </label>
 
                                     <select
                                         value={year}
                                         onChange={(e) => setYear(e.target.value)}
-                                        className="border rounded px-3 py-2 pr-8"
+                                        className="w-40 rounded-lg border border-gray-300 px-4 py-2.5 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                     >
                                         {[2024,2025,2026,2027].map(y=>(
                                             <option key={y} value={y}>
@@ -169,14 +173,14 @@ export default function Analysis({
 
                                 {/* 月 */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="mb-2 block text-sm font-semibold text-gray-700">
                                         月
                                     </label>
 
                                     <select
                                         value={month}
                                         onChange={(e)=>setMonth(e.target.value)}
-                                        className="border rounded px-3 py-2 pr-8"
+                                        className="w-32 rounded-lg border border-gray-300 px-4 py-2.5 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                     >
                                         {Array.from({length:12},(_,i)=>(
                                             <option key={i+1} value={i+1}>
@@ -188,11 +192,12 @@ export default function Analysis({
 
                                 <button
                                     onClick={() =>
-                                        router.get(route('analysis.index'), {
+                                        router.get(route("analysis.index"), {
                                             year,
                                             month,
                                         })
                                     }
+                                    className="h-[46px] rounded-lg bg-blue-600 px-8 text-white font-medium shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-0"
                                 >
                                     表示
                                 </button>

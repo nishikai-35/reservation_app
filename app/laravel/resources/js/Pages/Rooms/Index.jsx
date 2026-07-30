@@ -63,39 +63,30 @@ export default function Index({ auth, rooms }) {
                                 <table className="min-w-full table-auto">
                                     <thead className="bg-gray-50">
                                         <tr>
-
                                             <th className="px-5 py-4 text-left text-sm font-semibold text-gray-700">
                                                 部屋名
                                             </th>
-
                                             <th className="px-5 py-4 text-left text-sm font-semibold text-gray-700">
                                                 部屋番号
                                             </th>
-
                                             <th className="px-5 py-4 text-center text-sm font-semibold text-gray-700">
                                                 宿泊人数
                                             </th>
-
                                             <th className="px-5 py-4 text-right text-sm font-semibold text-gray-700">
                                                 大人料金
                                             </th>
-
                                             <th className="px-5 py-4 text-right text-sm font-semibold text-gray-700">
                                                 こども料金
                                             </th>
-
                                             <th className="px-5 py-4 text-center text-sm font-semibold text-gray-700">
                                                 チェックイン
                                             </th>
-
                                             <th className="px-5 py-4 text-center text-sm font-semibold text-gray-700">
                                                 チェックアウト
                                             </th>
-
                                             <th className="px-5 py-4 text-center text-sm font-semibold text-gray-700">
                                                 操作
                                             </th>
-
                                         </tr>
                                     </thead>
 
@@ -191,8 +182,7 @@ export default function Index({ auth, rooms }) {
 
                             {/* ページネーション */}
                             {rooms.links && (
-                                <div className="mt-6 flex justify-center gap-2">
-                                
+                                <div className="mt-6 mb-10 flex justify-center gap-2">
                                     {rooms.links.map((link, index) => (
                                         <Link
                                             key={index}
@@ -215,7 +205,6 @@ export default function Index({ auth, rooms }) {
                                             `}
                                         />
                                     ))}
-
                                 </div>
                             )}
                         </div>
