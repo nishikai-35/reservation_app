@@ -19,6 +19,7 @@ class Room extends Model
         'checkin_time',
         'checkout_time',
         'note',
+        'image',
     ];
 
     public function reservations()

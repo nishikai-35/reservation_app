@@ -165,9 +165,9 @@ export default function Edit({ auth, user }) {
                                 <button
                                     type="button"
                                     onClick={() => window.history.back()}
-                                    className="w-32 bg-red-500 hover:bg-red-700 text-white px-8 py-2 rounded-lg"
+                                    className="w-32 bg-gray-500 hover:bg-gray-700 text-white px-8 py-2 rounded-lg"
                                 >
-                                    キャンセル
+                                    戻る
                                 </button>
                                 
                                 <button

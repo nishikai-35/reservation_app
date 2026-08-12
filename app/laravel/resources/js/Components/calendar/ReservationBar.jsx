@@ -6,6 +6,7 @@ export default function ReservationBar({
     onClick,
 }) {
 
+    console.log(width);
     return (
         <div
             onClick={onClick}

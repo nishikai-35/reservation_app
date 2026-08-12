@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Reservation;
 use App\Models\Room;
+use Carbon\Carbon;
 use App\Mail\ReservationCreatedMail;
 use App\Mail\AdminReservationNotificationMail;
 
@@ -29,17 +30,35 @@ class ReservationController extends Controller
             })
             ->when($request->room_id, function ($query, $roomId) {
                 $query->where('room_id', $roomId);
-            })
-            ->when($request->checkin_date, function ($query, $checkinDate) {
-                $query->whereDate('checkin_date', $checkinDate);
-            })
-            ->when($request->checkout_date, function ($query, $checkoutDate) {
-                $query->whereDate('checkout_date', $checkoutDate);
-            })
+            })            
             ->when($request->status, function ($query, $status) {
                 $query->where('status', $status);
             })
-            ->orderBy('checkin_date')
+            ->when(
+                $request->from_date || $request->to_date,
+                function ($query) use ($request) {
+
+                    $start = $request->from_date;
+                    $end   = $request->to_date;
+
+                    if ($start && $end) {
+
+                        // 期間と重なる予約を取得
+                        $query->whereDate('checkin_date', '<=', $end)
+                              ->whereDate('checkout_date', '>=', $start);
+
+                    } elseif ($start) {
+
+                        $query->whereDate('checkout_date', '>=', $start);
+
+                    } elseif ($end) {
+
+                        $query->whereDate('checkin_date', '<=', $end);
+
+                    }
+                }
+            )
+            ->orderByDesc('created_at')
 
             ->paginate(10)
             ->withQueryString();
@@ -52,8 +71,8 @@ class ReservationController extends Controller
                 'reservation_number',
                 'guest_name',
                 'room_id',
-                'checkin_date',
-                'checkout_date',
+                'from_date',
+                'to_date',
                 'status',
             ]),
         ]);
@@ -91,15 +110,28 @@ class ReservationController extends Controller
             'status' => ['required', 'integer'],
         ]);
 
+
         // 予約番号の自動採番、予約日自動セット
         $validated['reservation_number'] = 'R' . now()->format('YmdHis');
         $validated['reservation_date'] = now()->toDateString();
         $validated['booking_site'] = '直接予約';
-
         $validated['adult_count'] = $validated['adult_count'] ?? 0;
         $validated['child_count'] = $validated['child_count'] ?? 0;
-        $validated['amount'] = $validated['amount'] ?? 0;
         $validated['payment_status'] = $validated['payment_status'] ?? 0;
+         // サーバー側で料金を自動計算
+        $room = Room::findOrFail($validated['room_id']);
+        $checkin = Carbon::parse($validated['checkin_date']);
+        $checkout = Carbon::parse($validated['checkout_date']);
+        $stayDays = $checkin->diffInDays($checkout);
+
+        $validated['amount'] =
+            (
+                $room->adult_price * $validated['adult_count']
+                +
+                $room->child_price * $validated['child_count']
+            )
+            * $stayDays;
+
 
         // 重複チェック
         $exists = Reservation::where('room_id', $validated['room_id'])

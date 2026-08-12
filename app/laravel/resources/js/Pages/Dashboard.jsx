@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CreateReservationModal from '@/Components/CreateReservationModal';
 
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
 
@@ -18,6 +18,7 @@ export default function Dashboard({
     stayingReservations = [],
     
 }) {
+
     const statusLabels = {
         1: '予約済み',
         2: 'チェックイン済み',
@@ -66,8 +67,9 @@ export default function Dashboard({
         dateLabel,
         actionLabel,
         actionStatus,
+        stayingTable = false,
     }) => (
-        <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border bg-white/95 shadow-sm">
 
             {/* カードタイトル */}
             <div className="border-b bg-gray-50 px-6 py-4">
@@ -163,22 +165,21 @@ export default function Dashboard({
 
                                     {/* 操作 */}
                                     <td className="px-4 py-4 text-center">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-
-                                                e.stopPropagation();
-
-                                                updateStatus(
-                                                    reservation.id,
-                                                    actionStatus
-                                                );
-
-                                            }}
-                                            className="rounded-lg bg-blue-600 px-5 py-2 whitespace-nowrap text-sm font-medium text-white transition hover:bg-blue-700"
-                                        >
-                                            {actionLabel}
-                                        </button>
+                                        {(!stayingTable || reservation.status === 2) && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    updateStatus(
+                                                        reservation.id,
+                                                        actionStatus
+                                                    );
+                                                }}
+                                                className="rounded-lg bg-blue-600 px-5 py-2 whitespace-nowrap text-sm font-medium text-white transition hover:bg-blue-700"
+                                            >
+                                                {actionLabel}
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))
@@ -192,17 +193,14 @@ export default function Dashboard({
     return (
         <AuthenticatedLayout
             user={auth.user}
-            // header={
-            //     <h2 className="text-xl font-semibold leading-tight text-gray-800">
-            //         ダッシュボード
-            //     </h2>
-            // }
         >
-            <Head title="ダッシュボード" />
-
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4">
-
+            <Head title="ホーム" />
+            <div
+                className="min-h-screen bg-cover bg-center bg-fixed py-8"
+                style={{backgroundImage: "url('/images/dashboard-bg.jpg')",}}
+            >
+                <div className="mx-auto max-w-7xl rounded-2xl bg-white/70 p-6 backdrop-blur-sm">
+ 
                     {/* タイトル */}
                     <div className="rounded-2xl border bg-white p-6 shadow-sm">
                         <div className="mb-8 flex items-start justify-between">
@@ -285,6 +283,7 @@ export default function Dashboard({
                         </div>
                     </div>
 
+
                     <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
                         <ReservationTable
                             title="本日のチェックイン予定"
@@ -307,8 +306,9 @@ export default function Dashboard({
                                 title="現在滞在中"
                                 reservations={stayingReservations}
                                 dateLabel="チェックアウト日"
-                                actionLabel="詳細"
+                                actionLabel="滞在中"
                                 actionStatus={3}
+                                stayingTable={true} 
                             />
                         </div>
 

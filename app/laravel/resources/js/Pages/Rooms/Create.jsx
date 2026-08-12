@@ -13,11 +13,15 @@ export default function Create({ auth }) {
         checkin_time: '15:00',
         checkout_time: '10:00',
         note: '',
+        image: null,
     });
 
     const submit = (e) => {
+        
         e.preventDefault();
-        post(route('rooms.store'));
+        post(route('rooms.store'), {
+            forceFormData:true,
+        });
     };
 
     return (
@@ -150,6 +154,30 @@ export default function Create({ auth }) {
                                 </div>
                             </div>
                         </div>
+
+
+                        {/* 部屋画像アップロード */}
+                        <div className="bg-white rounded-xl border shadow-sm mb-6">
+                            <div className="px-6 py-4 border-b">
+                                <h2 className="text-xl font-bold">
+                                    部屋画像
+                                </h2>
+
+                                <div className="mt-5">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e)=>
+                                            setData(
+                                                'image',
+                                                e.target.files[0]
+                                            )
+                                        }
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
                                     
                         {/* 料金カード */}
                         <div className="bg-white rounded-xl border shadow-sm mb-6">

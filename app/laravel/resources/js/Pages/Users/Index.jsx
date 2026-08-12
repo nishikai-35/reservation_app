@@ -34,209 +34,221 @@ export default function Index({ auth, users, flash, filters }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={
-                <h2 className="font-semibold text-xl text-gray-800">
-                    ユーザー管理
-                </h2>
-            }
         >
             <Head title="ユーザー管理" />
+            <div
+                className="min-h-screen bg-cover bg-center bg-fixed py-8"
+                style={{backgroundImage: "url('/images/dashboard-bg.jpg')",}}
+            >
+                <div className="mx-auto max-w-7xl rounded-2xl bg-white/70 p-6 backdrop-blur-sm">
 
-            <div className="py-6">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-                    {/* フラッシュメッセージ */}
-                    {flash?.success && (
-                        <div className="rounded bg-green-100 text-green-700 p-3">
-                            {flash.success}
+                    {/* タイトル */}
+                    <div className="mb-8 flex items-start justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">
+                                ユーザー管理
+                            </h1>
+                            <p className="mt-2 text-gray-500">
+                                宿泊者アカウント情報を編集・削除できます。
+                            </p>
                         </div>
-                    )}
-
-                    {flash?.error && (
-                        <div className="rounded bg-red-100 text-red-700 p-3">
-                            {flash.error}
-                        </div>
-                    )}
-
-                    {/* ===========================
-                        検索条件カード
-                    ============================ */}
-                    <div className="bg-white shadow rounded-lg">
-
-                        <div className="border-b px-6 py-4">
-                            <h3 className="text-lg font-semibold">
-                                検索条件
-                            </h3>
-                        </div>
-
-                        <div className="p-6">
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        氏名
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        value={values.name}
-                                        onChange={(e) =>
-                                            setValues({
-                                                ...values,
-                                                name: e.target.value,
-                                            })
-                                        }
-                                        placeholder="氏名を入力"
-                                        className="w-full rounded border-gray-300"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        メールアドレス
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        value={values.email}
-                                        onChange={(e) =>
-                                            setValues({
-                                                ...values,
-                                                email: e.target.value,
-                                            })
-                                        }
-                                        placeholder="メールアドレスを入力"
-                                        className="w-full rounded border-gray-300"
-                                    />
-                                </div>
-
-                            </div>
-
-                            <div className="flex justify-end gap-3 mt-6">
-
-                                <button
-                                    onClick={handleClear}
-                                    className="px-5 py-2 border rounded-lg hover:bg-gray-100"
-                                >
-                                    クリア
-                                </button>
-
-                                <button
-                                    onClick={handleSearch}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                                >
-                                    検索
-                                </button>
-
-                            </div>
-
-                        </div>
-
                     </div>
 
-                    {/* ===========================
-                        ユーザー一覧カード
-                    ============================ */}
-                    <div className="bg-white shadow rounded-lg">
+                    <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-                        <div className="border-b px-6 py-4 flex justify-between items-center">
+                        {/* フラッシュメッセージ */}
+                        {flash?.success && (
+                            <div className="rounded bg-green-100 text-green-700 p-3">
+                                {flash.success}
+                            </div>
+                        )}
 
-                            <div>
+                        {flash?.error && (
+                            <div className="rounded bg-red-100 text-red-700 p-3">
+                                {flash.error}
+                            </div>
+                        )}
 
+                        {/* ===========================
+                            検索条件カード
+                        ============================ */}
+                        <div className="bg-white shadow rounded-lg">
+
+                            <div className="border-b px-6 py-4">
                                 <h3 className="text-lg font-semibold">
-                                    ユーザー一覧
+                                    検索条件
                                 </h3>
+                            </div>
 
-                                <p className="text-sm text-gray-500 mt-1">
-                                    検索結果：{users.length}件
-                                </p>
+                            <div className="p-6">
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">
+                                            氏名
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            value={values.name}
+                                            onChange={(e) =>
+                                                setValues({
+                                                    ...values,
+                                                    name: e.target.value,
+                                                })
+                                            }
+                                            placeholder="氏名を入力"
+                                            className="w-full rounded border-gray-300"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">
+                                            メールアドレス
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            value={values.email}
+                                            onChange={(e) =>
+                                                setValues({
+                                                    ...values,
+                                                    email: e.target.value,
+                                                })
+                                            }
+                                            placeholder="メールアドレスを入力"
+                                            className="w-full rounded border-gray-300"
+                                        />
+                                    </div>
+
+                                </div>
+
+                                <div className="flex justify-end gap-3 mt-6">
+
+                                    <button
+                                        onClick={handleClear}
+                                        className="px-5 py-2 border rounded-lg hover:bg-gray-100"
+                                    >
+                                        クリア
+                                    </button>
+
+                                    <button
+                                        onClick={handleSearch}
+                                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    >
+                                        検索
+                                    </button>
+
+                                </div>
 
                             </div>
 
-                            <Link
-                                href={route('users.create')}
-                                className="rounded-lg bg-black px-5 py-3 font-medium text-white transition hover:bg-gray-800"
-                            >
-                                新規登録
-                            </Link>
-
                         </div>
 
-                        <div className="overflow-x-auto">
+                        {/* ===========================
+                            ユーザー一覧カード
+                        ============================ */}
+                        <div className="bg-white shadow rounded-lg">
 
-                            <table className="min-w-full">
+                            <div className="border-b px-6 py-4 flex justify-between items-center">
 
-                                <thead className="bg-gray-200">
+                                <div>
 
-                                    <tr>
-                                        <th className="px-4 py-3 text-left">ID</th>
-                                        <th className="px-4 py-3 text-left">氏名</th>
-                                        <th className="px-4 py-3 text-left">メールアドレス</th>
-                                        <th className="px-4 py-3 text-left">登録日</th>
-                                        <th className="px-4 py-3 text-center">操作</th>
-                                    </tr>
+                                    <h3 className="text-lg font-semibold">
+                                        ユーザー一覧
+                                    </h3>
 
-                                </thead>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        検索結果：{users.length}件
+                                    </p>
 
-                                <tbody>
+                                </div>
 
-                                    {users.length > 0 ? (
+                                <Link
+                                    href={route('users.create')}
+                                    className="rounded-lg bg-black px-5 py-3 font-medium text-white transition hover:bg-gray-800"
+                                >
+                                    新規登録
+                                </Link>
 
-                                        users.map((user) => (
+                            </div>
 
-                                            <tr
-                                                key={user.id}
-                                                className="border-t hover:bg-gray-50"
-                                            >
+                            <div className="overflow-x-auto">
 
-                                                <td className="px-4 py-3">
-                                                    {user.id}
-                                                </td>
+                                <table className="min-w-full">
 
-                                                <td className="px-4 py-3">
-                                                    {user.name}
-                                                </td>
+                                    <thead className="bg-gray-200">
 
-                                                <td className="px-4 py-3">
-                                                    {user.email}
-                                                </td>
+                                        <tr>
+                                            <th className="px-4 py-3 text-left">ID</th>
+                                            <th className="px-4 py-3 text-left">氏名</th>
+                                            <th className="px-4 py-3 text-left">メールアドレス</th>
+                                            <th className="px-4 py-3 text-left">登録日</th>
+                                            <th className="px-4 py-3 text-center">操作</th>
+                                        </tr>
 
-                                                <td className="px-4 py-3">
-                                                    {new Date(user.created_at).toLocaleDateString('ja-JP')}
-                                                </td>
+                                    </thead>
 
-                                                <td className="px-4 py-3">
-                                                    <div className="flex justify-center gap-6">
-                                                        <Link
-                                                            href={route('users.edit', user.id)}
-                                                            className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
-                                                        >
-                                                            編集
-                                                        </Link>
+                                    <tbody>
 
-                                                        <button
-                                                            onClick={() => handleDelete(user.id)}
-                                                            className="rounded bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
-                                                        >
-                                                            削除
-                                                        </button>
-                                                    </div>
+                                        {users.length > 0 ? (
+
+                                            users.map((user) => (
+
+                                                <tr
+                                                    key={user.id}
+                                                    className="border-t hover:bg-gray-50"
+                                                >
+
+                                                    <td className="px-4 py-3">
+                                                        {user.id}
+                                                    </td>
+
+                                                    <td className="px-4 py-3">
+                                                        {user.name}
+                                                    </td>
+
+                                                    <td className="px-4 py-3">
+                                                        {user.email}
+                                                    </td>
+
+                                                    <td className="px-4 py-3">
+                                                        {new Date(user.created_at).toLocaleDateString('ja-JP')}
+                                                    </td>
+
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex justify-center gap-6">
+                                                            <Link
+                                                                href={route('users.edit', user.id)}
+                                                                className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
+                                                            >
+                                                                編集
+                                                            </Link>
+
+                                                            <button
+                                                                onClick={() => handleDelete(user.id)}
+                                                                className="rounded bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
+                                                            >
+                                                                削除
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan="5"
+                                                    className="py-8 text-center text-gray-500"
+                                                >
+                                                    該当するユーザーがありません。
                                                 </td>
                                             </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td
-                                                colSpan="5"
-                                                className="py-8 text-center text-gray-500"
-                                            >
-                                                該当するユーザーがありません。
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

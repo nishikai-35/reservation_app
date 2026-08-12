@@ -18,7 +18,31 @@ class BookingImportService
         $this->jalanImporter = $jalanImporter;
     }
 
-    public function import(string $path)
+
+    public function preview(string $path): array
+    {
+        $importer = $this->getImporter($path);
+
+        return $importer->preview($path);
+    }
+
+
+    public function import(
+        string $path,
+        array $selectedReservationNumbers = []
+    ): int {
+    
+        // dd($selectedReservationNumbers);
+        $importer = $this->getImporter($path);
+
+        return $importer->import(
+            $path,
+            $selectedReservationNumbers
+        );
+    }
+
+
+    private function getImporter(string $path)
     {
         // csvファイル文字コード確認
         $content = file_get_contents($path);
@@ -41,7 +65,6 @@ class BookingImportService
 
         while (($row = fgetcsv($handle)) !== false) {
 
-            // Shift_JIS → UTF-8
             $row = array_map(function ($value) use ($encoding) {
 
                 $value = mb_convert_encoding(
@@ -60,7 +83,6 @@ class BookingImportService
 
             }, $row);
 
-
             if (in_array('予約番号', $row)) {
 
                 $header = $row;
@@ -68,36 +90,26 @@ class BookingImportService
             }
         }
 
-        if ($header === null) {
-            throw new \Exception('BookingImportService：CSVヘッダーが取得できません。');
-        }
-
-        // 動作確認（ヘッダー名　取得確認）
-        // dd($header);
-
-        // BOM除去
-        $header = array_map(function ($value) {
-            return preg_replace(
-                '/^\xEF\xBB\xBF/',
-                '',
-                trim($value)
-            );
-        }, $header);
-
         fclose($handle);
 
-        /*
-        |--------------------------------------------------------------------------
-        | CSV種類判定
-        |--------------------------------------------------------------------------
-        */
+        if ($header === null) {
+
+            throw new \Exception(
+                'BookingImportService：CSVヘッダーが取得できません。'
+            );
+        }
+
+        // dd([
+        //     'encoding' => $encoding,
+        //     'header' => $header,
+        // ]);
 
         // Booking.com
         if (
             in_array('ユニットタイプ', $header) &&
             in_array('予約番号', $header)
         ) {
-            return $this->bookingImporter->import($path);
+            return $this->bookingImporter;
         }
 
         // じゃらん
@@ -105,10 +117,9 @@ class BookingImportService
             in_array('部屋タイプ名称', $header) &&
             in_array('予約番号', $header)
         ) {
-            return $this->jalanImporter->import($path);
+            return $this->jalanImporter;
         }
 
-        // 未対応CSV
         throw new \Exception(
             '対応していないCSV形式です。'
         );

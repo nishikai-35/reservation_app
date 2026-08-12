@@ -57,16 +57,16 @@ export default function Daily({
                         <table className="min-w-full text-sm">
                             <thead className="sticky top-0 bg-slate-800 text-white">
                                 <tr>
-                                    <th className="px-4 py-3">
+                                    <th className="px-4 py-3 text-center align-middle">
                                         日付
                                     </th>
-                                    <th className="px-4 py-3">
+                                    <th className="px-4 py-3 text-center align-middle">
                                         売上
                                     </th>
-                                    <th className="px-4 py-3">
+                                    <th className="px-4 py-3 text-center align-middle">
                                         宿泊人数
                                     </th>
-                                    <th className="px-4 py-3">
+                                    <th className="px-4 py-3 text-center align-middle">
                                         稼働率
                                     </th>
                                 </tr>
@@ -74,35 +74,28 @@ export default function Daily({
 
                             <tbody>
                                 {dailyData.map((day) => (
-
                                     <tr
                                         key={day.date}
                                         className="border-b hover:bg-gray-50"
                                     >
-                                        <td className="px-4 py-3">
-
+                                        <td className="px-4 py-3 text-center align-middle">
                                             {day.date}
-
                                         </td>
-                                        <td className="px-4 py-3">
-
+                                
+                                        <td className="px-4 py-3 text-center align-middle">
                                             ¥{Number(day.sales).toLocaleString()}
-
                                         </td>
-                                        <td className="px-4 py-3">
-
+                                
+                                        <td className="px-4 py-3 text-center align-middle">
                                             {day.guests}人
-
                                         </td>
-                                        <td className="px-4 py-3">
-
+                                
+                                        <td className="px-4 py-3 text-center align-middle">
                                             {day.occupancy_rate}%
-
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
-
                         </table>
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CreateReservationModal from '@/Components/CreateReservationModal';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function Index({ auth, reservations, rooms = [] }) {
@@ -31,26 +31,6 @@ export default function Index({ auth, reservations, rooms = [] }) {
     };
 
 
-    // フォーム初期値
-    const { data, setData, post, processing, errors, reset } = useForm({
-        room_id: '',
-        checkin_date: '',
-        checkout_date: '',
-        guest_count: 1,
-        adult_count: 1,
-        child_count: 0,
-        amount: 0,
-        payment_status: 0,
-        payment_method: '',
-        guest_name: '',
-        phone: '',
-        email: '',
-        address: '',
-        note: '',
-        status: 1,
-    });
-
-
     // 予約データ未取得の場合の対策
     const reservationList = reservations?.data ?? [];
 
@@ -61,8 +41,8 @@ export default function Index({ auth, reservations, rooms = [] }) {
         guest_name: '',
         room_id: '',
         status: '',
-        checkin_date: '',
-        checkout_date: '',
+        from_date: '',
+        to_date: '',
     });
 
     // 検索処理
@@ -92,8 +72,8 @@ export default function Index({ auth, reservations, rooms = [] }) {
             guest_name: '',
             room_id: '',
             status: '',
-            checkin_date: '',
-            checkout_date: '',
+            from_date: '',
+            to_date: '',
         });
 
         router.get(route('reservations.index'));
@@ -110,24 +90,23 @@ export default function Index({ auth, reservations, rooms = [] }) {
     };
 
 
+    // モーダル表示の管理状態
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [selectedRoom, setSelectedRoom] = useState(null);
 
 
     return (
         <AuthenticatedLayout
             user={auth.user}
-            // header={
-            //     <h2 className="text-xl font-semibold text-gray-800">
-            //         予約管理
-            //     </h2>
-            // }
         >
             <Head title="予約管理" />
-            <div className="min-h-[calc(100vh-90px)] bg-gray-100 p-6 flex flex-col">
-                <div className="mx-auto max-w-7xl px-6">
-                    <div className="mb-8">
+            <div
+                className="min-h-screen bg-cover bg-center bg-fixed py-8"
+                style={{backgroundImage: "url('/images/dashboard-bg.jpg')",}}
+            >
+                <div className="mx-auto max-w-7xl rounded-2xl bg-white/70 p-6 backdrop-blur-sm">
 
+                    {/* タイトル */}
+                    <div className="mb-8">
                         <h1 className="text-3xl font-bold">
                             予約管理
                         </h1>
@@ -135,7 +114,6 @@ export default function Index({ auth, reservations, rooms = [] }) {
                         <p className="mt-2 text-gray-500">
                             予約情報の検索・確認・編集を行います。
                         </p>
-
                     </div>
 
                     <div className="mb-8 rounded-xl border bg-white p-6 shadow-sm">
@@ -230,34 +208,31 @@ export default function Index({ auth, reservations, rooms = [] }) {
                                 </select>
                             </div>
                                 
-                            {/* チェックイン */}
+                            {/* 期間 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
-                                    チェックイン
+                                    期間
                                 </label>
-                                
-                                <input
-                                    type="date"
-                                    name="checkin_date"
-                                    value={search.checkin_date}
-                                    onChange={handleSearchChange}
-                                    className="w-full rounded-lg border px-3 py-2"
-                                />
-                            </div>
-                                
-                            {/* チェックアウト */}
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold">
-                                    チェックアウト
-                                </label>
-                                
-                                <input
-                                    type="date"
-                                    name="checkout_date"
-                                    value={search.checkout_date}
-                                    onChange={handleSearchChange}
-                                    className="w-full rounded-lg border px-3 py-2"
-                                />
+
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="date"
+                                        name="from_date"
+                                        value={search.from_date}
+                                        onChange={handleSearchChange}
+                                        className="w-full rounded-lg border px-3 py-2"
+                                    />
+
+                                    <span>～</span>
+
+                                    <input
+                                        type="date"
+                                        name="to_date"
+                                        value={search.to_date}
+                                        onChange={handleSearchChange}
+                                        className="w-full rounded-lg border px-3 py-2"
+                                    />
+                                </div>
                             </div>
                                 
                             {/* ボタン */}

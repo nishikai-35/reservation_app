@@ -18,9 +18,7 @@ class ReservationImportController extends Controller
     }
 
 
-    /**
-     * インポート画面
-     */
+    // インポート画面
     public function index()
     {
         return Inertia::render(
@@ -29,9 +27,7 @@ class ReservationImportController extends Controller
     }
 
 
-    /**
-     * CSVアップロード
-     */
+    // CSVアップロード
     public function store(Request $request)
     {
         $request->validate([
@@ -40,17 +36,35 @@ class ReservationImportController extends Controller
                 'file',
                 'mimes:csv,txt'
             ],
+
+            'reservation_numbers' => [
+                'required',
+                'array'
+            ],
+            
+            'reservation_numbers.*' => [
+                'string'
+            ],
         ]);
 
         $path = $request
             ->file('csv')
             ->getRealPath();
 
+        // 選択された予約番号を取得
+        $selectedReservationNumbers = $request->input(
+            'reservation_numbers',
+            []
+        );
+
         try {
+
             // インポート件数取得
             $count = $this->bookingImportService->import(
-                $path
+                $path,
+                $selectedReservationNumbers
             );
+
         } catch (\Exception $e) {
 
             return back()->with(
@@ -63,5 +77,54 @@ class ReservationImportController extends Controller
             'success',
             "{$count}件の予約をインポートしました。"
         );
+    }
+
+
+    // プレビュー機能
+    public function preview(Request $request)
+    {
+        $request->validate([
+            'csv' => [
+                'required',
+                'file',
+                'mimes:csv,txt'
+            ],
+        ]);
+
+
+        $file = $request->file('csv');
+
+        // 一時保存
+        $path = $file->store('imports', 'local');
+
+        // 絶対パス取得
+        $fullPath = storage_path(
+            'app/private/'.$path
+        );
+
+        try {
+
+            $data = $this->bookingImportService
+                ->preview($fullPath);
+
+            unlink($fullPath);
+
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+
+        } finally {
+
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
+        }
+
+        return response()->json([
+            'data' => $data,
+        ]);
     }
 }

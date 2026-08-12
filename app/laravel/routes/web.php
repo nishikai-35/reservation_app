@@ -114,6 +114,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::post('/reservations/import', [ReservationImportController::class, 'store'])
         ->name('reservations.import.store');
+
+    Route::post('/reservations/preview', [ReservationImportController::class, 'preview'])
+        ->name('reservations.import.preview');
 });
 
 

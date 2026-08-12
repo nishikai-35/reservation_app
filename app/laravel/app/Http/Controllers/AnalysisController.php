@@ -17,6 +17,8 @@ class AnalysisController extends Controller
         $year = $request->year ?? now()->year;
         $month = $request->month ?? now()->month;
 
+        // dd($request->all());
+
         // 対象月の予約取得
         $reservations = Reservation::with('room')
             ->whereYear('checkin_date', $year)
@@ -106,11 +108,17 @@ class AnalysisController extends Controller
                 ->whereDate('checkout_date', '>', $date)
                 ->get();
 
+            // その日にチェックインする予約
+            $checkinReservations = Reservation::where('status', '!=', 9)
+                ->whereDate('checkin_date', $date)
+                ->get();
+
             // 売上
-            $sales = $dayReservations->sum('amount');
+            $sales = $checkinReservations->sum('amount');
 
             // 宿泊人数
-            $guests = $dayReservations->sum('guest_count');
+            $guests =
+                $checkinReservations->sum('adult_count') + $checkinReservations->sum('child_count');
 
             // 稼働部屋数
             $usedRooms = $dayReservations
@@ -332,7 +340,6 @@ class AnalysisController extends Controller
         return Inertia::render(
             'Analysis/Index',
             [
-
                 'summary'=>[
                     'year'=>$year,
                     'month'=>$month,
@@ -340,9 +347,9 @@ class AnalysisController extends Controller
                     'guest_count' => $totalGuests,
                     'adult_count' => $totalAdults,
                     'child_count' => $totalChildren,
-                    'reservation_count'=>$reservationCount,
-                    'occupancy_rate'=>$occupancyRate,
-                    'room_count'=>$roomCount,
+                    'reservation_count'=> $reservationCount,
+                    'occupancy_rate'=> $occupancyRate,
+                    'room_count'=> $roomCount,
                     'used_rooms' => $usedRoomDays,
                     'total_rooms' => $roomCount,
                 ],
@@ -354,7 +361,7 @@ class AnalysisController extends Controller
                             'previous_sales' => $item['previous_sales'],
                             'occupancy' => $item['current_occupancy'],
                             'previous_occupancy' => $item['previous_occupancy'],
-                                ];
+                        ];
                 }),
 
                 'dailyData' => $dailyData,
@@ -393,9 +400,17 @@ class AnalysisController extends Controller
                 ->whereDate('checkout_date', '>', $date)
                 ->get();
 
-            $sales = $dayReservations->sum('amount');
+            // その日にチェックインする予約
+            $checkinReservations = Reservation::where('status', '!=', 9)
+                ->whereDate('checkin_date', $date)
+                ->get();
 
-            $guests = $dayReservations->sum('guest_count');
+            // 売上
+            $sales = $checkinReservations->sum('amount');
+
+            // 宿泊人数
+            $guests =
+                $checkinReservations->sum('adult_count') + $checkinReservations->sum('child_count');
 
             $usedRooms = $dayReservations
                 ->pluck('room_id')
@@ -419,18 +434,77 @@ class AnalysisController extends Controller
             ];
         }
 
+        // 集計値
+        $totalSales = collect($dailyData)->sum('sales');
+        $totalGuests = collect($dailyData)->sum('guests');
+        $averageOccupancy = round(
+            collect($dailyData)->avg('occupancy_rate'),
+            1
+        );
+
         $fileName = 'analysis.csv';
 
         $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' =>
-                "attachment; filename={$fileName}",
+            'Content-Type' => 'text/csv; charset=Shift_JIS',
+            'Content-Disposition' => "attachment; filename={$fileName}",
         ];
+        
 
-        $callback = function () use ($dailyData) {
+        $callback = function () use (
+            $dailyData,
+            $year,
+            $month,
+            $totalSales,
+            $totalGuests,
+            $averageOccupancy
+        ) {
+            
+              $file = fopen('php://output', 'w');
 
-            $file = fopen('php://output', 'w');
+            // UTF-8 → CP932（Excel対応）
+            stream_filter_append(
+                $file,
+                'convert.iconv.UTF-8/CP932//TRANSLIT'
+            );
 
+            // タイトル
+            fputcsv($file, ['月次分析レポート']);
+            fputcsv($file, []);
+
+            // 対象年月・作成日
+            fputcsv($file, [
+                '対象年月',
+                "{$year}年{$month}月"
+            ]);
+
+            fputcsv($file, [
+                '作成日',
+                now()->format('Y-m-d')
+            ]);
+
+            fputcsv($file, []);
+
+
+            // 集計値
+            fputcsv($file, [
+                '合計売上',
+                number_format($totalSales) . '円'
+            ]);
+
+            fputcsv($file, [
+                '合計宿泊人数',
+                number_format($totalGuests) . '人'
+            ]);
+
+            fputcsv($file, [
+                '平均稼働率',
+                $averageOccupancy . '%'
+            ]);
+
+            // 空行
+            fputcsv($file, []);
+
+            // ヘッダー
             fputcsv(
                 $file,
                 [
@@ -452,7 +526,6 @@ class AnalysisController extends Controller
                         $day['occupancy_rate'] . '%',
                     ]
                 );
-
             }
 
             fclose($file);
@@ -464,6 +537,7 @@ class AnalysisController extends Controller
             $headers
         );
     }
+
 
     // 詳細内容（日別データ）
     public function daily(Request $request)
@@ -489,11 +563,17 @@ class AnalysisController extends Controller
                 ->whereDate('checkout_date', '>', $date)
                 ->get();
 
+            // その日にチェックインする予約
+            $checkinReservations = Reservation::where('status', '!=', 9)
+                ->whereDate('checkin_date', $date)
+                ->get();
+
             // 売上
-            $sales = $dayReservations->sum('amount');
+            $sales = $checkinReservations->sum('amount');
 
             // 宿泊人数
-            $guests = $dayReservations->sum('guest_count');
+            $guests =
+                $checkinReservations->sum('adult_count') + $checkinReservations->sum('child_count');
 
             // 稼働部屋数
             $usedRooms = $dayReservations
@@ -519,6 +599,16 @@ class AnalysisController extends Controller
             ];
         }
 
+        // 集計値
+        $totalSales = collect($dailyData)->sum('sales');
+
+        $totalGuests = collect($dailyData)->sum('guests');
+
+        $averageOccupancy = round(
+            collect($dailyData)->avg('occupancy_rate'),
+            1
+        );
+
         
         return Inertia::render(
             'Analysis/Daily',
@@ -526,6 +616,12 @@ class AnalysisController extends Controller
                 'year' => $year,
                 'month' => $month,
                 'dailyData' => $dailyData,
+
+                'summary' => [
+                    'total_sales' => $totalSales,
+                    'total_guests' => $totalGuests,
+                    'occupancy_rate' => $averageOccupancy,
+                ],
             ]
         );
     }

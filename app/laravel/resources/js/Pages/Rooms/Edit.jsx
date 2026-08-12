@@ -3,22 +3,32 @@ import { Head, useForm } from '@inertiajs/react';
 
 export default function Create({ auth, room }) {
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         name: room?.name ?? '',
         room_number: room?.room_number ?? '',
-        capacity_min: 1,
-        capacity_max: 4,
-        adult_price: '',
-        child_price: '',
-        checkin_time: '15:00',
-        checkout_time: '10:00',
-        note: '',
+        capacity_min: room?.capacity_min ?? '',
+        capacity_max: room?.capacity_max ?? '',
+        adult_price: room?.adult_price ?? '',
+        child_price: room?.child_price ?? '',
+        checkin_time: room?.checkin_time ?? '15:00',
+        checkout_time: room?.checkout_time ?? '10:00',
+        note: room?.note ?? '',
+        image: null,
+        _method: 'put',
     });
+
 
     const submit = (e) => {
         e.preventDefault();
-        put(route('rooms.update', room.id));
+    
+        console.log(route('rooms.update', room.id));
+        console.log(data);
+    
+        post(route('rooms.update', room.id), {
+            forceFormData: true,
+        });
     };
+
 
     return (
         <AuthenticatedLayout
@@ -150,6 +160,39 @@ export default function Create({ auth, room }) {
                                 </div>
                             </div>
                         </div>
+
+
+                        {/* 部屋画像アップロード */}
+                        <div className="bg-white rounded-xl border shadow-sm mb-6">
+                            <div className="px-6 py-4 border-b">
+                                <h2 className="text-xl font-bold">
+                                    部屋画像
+                                </h2>
+
+                                <div className="mt-5">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e)=>
+                                            setData(
+                                                'image',
+                                                e.target.files[0]
+                                            )
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            {room.image && (
+                                <div className="mt-6 mb-5 px-6">
+                                    <img
+                                        src={`/storage/${room.image}`}
+                                        alt={room.name}
+                                        className="h-48 w-72 rounded-xl border object-cover"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
                                     
                         {/* 料金カード */}
                         <div className="bg-white rounded-xl border shadow-sm mb-6">
@@ -227,15 +270,15 @@ export default function Create({ auth, room }) {
                             <button
                                 type="button"
                                 onClick={() => window.history.back()}
-                                className="w-32 bg-red-500 hover:bg-red-700 text-white px-8 py-2 rounded-lg"
+                                className="w-32 bg-gray-500 hover:bg-gray-700 text-white px-8 py-2 rounded-lg"
                             >
-                                キャンセル
+                                戻る
                             </button>
 
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="w-32 bg-green-500 hover:bg-green-600 text-white px-8 py-2 rounded-lg"
+                                className="w-32 bg-blue-500 hover:bg-blue-600 text-white px-8 py-2 rounded-lg"
                             >
                                 更新
                             </button>

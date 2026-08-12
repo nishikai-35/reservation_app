@@ -17,11 +17,12 @@ export default function ReservationCreateModal({
         post,
         processing,
         errors,
+        put,
     } = useForm({
 
         room_id: room?.id ?? '',
         reservation_number: '',
-        reservation_site: '自社予約',
+        booking_site: '自社予約',
         reservation_date:
             new Date().toISOString().split('T')[0],
 
@@ -36,7 +37,7 @@ export default function ReservationCreateModal({
         address: '',
         payment_method: '',
         payment_status: 0,
-        total_price: 0,
+        amount: 0,
         note: '',
         status: 1,
     });
@@ -60,9 +61,11 @@ export default function ReservationCreateModal({
     const [availableRooms, setAvailableRooms] = useState([]);
 
     const searchAvailableRooms = async () => {
+
         if (
             !data.checkin_date ||
-            !data.checkout_date
+            !data.checkout_date ||
+            new Date(data.checkout_date) <= new Date(data.checkin_date)
         ) {
             setAvailableRooms([]);
             return;
@@ -83,8 +86,13 @@ export default function ReservationCreateModal({
             }),
         });
 
+        if (!response.ok) {
+            setAvailableRooms([]);
+            return;
+        }
+
         const result = await response.json();
-        setAvailableRooms(result.rooms);
+        setAvailableRooms(result.rooms ?? []);
     };
 
     useEffect(() => {
@@ -95,6 +103,9 @@ export default function ReservationCreateModal({
     ]);
 
     useEffect(() => {
+
+        if (room) return;
+
         if (
             data.room_id &&
             !availableRooms.some(
@@ -185,7 +196,7 @@ export default function ReservationCreateModal({
 
     // 合計料金フォームに反映
     useEffect(() => {
-        setData('total_price', totalPrice);
+        setData('amount', totalPrice);
     }, [
         totalPrice,
         setData,
@@ -228,7 +239,8 @@ export default function ReservationCreateModal({
 
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="flex max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
 
                 {/* ヘッダー */}
@@ -247,11 +259,12 @@ export default function ReservationCreateModal({
                         className="text-3xl hover:text-gray-300"
                     >
                         ×
-                    </button>
+                     </button>
                 </div>
-
+    
                 {/* フォーム */}
                 <form
+                    id="reservation-form"
                     onSubmit={submit}
                     className="flex-1 overflow-y-auto bg-gray-50 p-6"
                 >
@@ -260,7 +273,7 @@ export default function ReservationCreateModal({
                         <div className="bg-gray-700 px-6 py-3 text-lg font-semibold text-white">
                             基本情報
                         </div>
-
+    
                         <div className="grid grid-cols-4 gap-6 p-6">
                             {/* 予約番号 */}
                             <div>
@@ -274,11 +287,11 @@ export default function ReservationCreateModal({
                                     className="w-full rounded-lg border bg-gray-100 px-4 py-3"
                                 />
                             </div>
-
-                            {/* 予約名 */}
+    
+                            {/* 宿泊者名 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
-                                    予約名
+                                    宿泊者名
                                 </label>
                                 <input
                                     type="text"
@@ -297,17 +310,17 @@ export default function ReservationCreateModal({
                                     </p>
                                 )}
                             </div>
-
+                            
                             {/* 予約サイト */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
                                     予約サイト
                                 </label>
                                 <select
-                                    value={data.reservation_site}
+                                    value={data.booking_site}
                                     onChange={(e) =>
                                         setData(
-                                            'reservation_site',
+                                            'booking_site',
                                             e.target.value
                                         )
                                     }
@@ -330,7 +343,7 @@ export default function ReservationCreateModal({
                                     </option>
                                 </select>
                             </div>
-
+                                
                             {/* 予約日 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
@@ -353,7 +366,7 @@ export default function ReservationCreateModal({
                                     </p>
                                 )}
                             </div>
-
+                            
                             {/* チェックイン */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
@@ -376,7 +389,7 @@ export default function ReservationCreateModal({
                                     </p>
                                 )}
                             </div>
-
+                            
                             {/* チェックアウト */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
@@ -399,7 +412,7 @@ export default function ReservationCreateModal({
                                     </p>
                                 )}
                             </div>
-
+                            
                             {/* 部屋 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
@@ -450,13 +463,13 @@ export default function ReservationCreateModal({
                                     </p>
                                 )}
                             </div>
-
+                            
                             {/* 宿泊人数 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
                                     宿泊人数
                                 </label>
-
+                            
                                 <input
                                     type="number"
                                     value={data.guest_count}
@@ -470,13 +483,13 @@ export default function ReservationCreateModal({
                                     </p>
                                 )}
                             </div>
-
+                            
                             {/* 大人人数 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
                                     大人人数
                                 </label>
-
+                            
                                 <input
                                     type="number"
                                     min="1"
@@ -496,13 +509,13 @@ export default function ReservationCreateModal({
                                     </p>
                                 )}
                             </div>
-
+                            
                             {/* 子ども人数 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
                                     子ども人数
                                 </label>
-
+                            
                                 <input
                                     type="number"
                                     min="0"
@@ -522,13 +535,13 @@ export default function ReservationCreateModal({
                                     </p>
                                 )}
                             </div>
-
+                            
                             {/* 決済方法 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
                                     決済方法
                                 </label>
-
+                            
                                 <select
                                     value={data.payment_method}
                                     onChange={(e) =>
@@ -552,20 +565,20 @@ export default function ReservationCreateModal({
                                         銀行振込
                                     </option>
                                 </select>
-
+                                
                                 {errors.payment_method && (
                                     <p className="mt-1 text-sm text-red-600">
                                         {errors.payment_method}
                                     </p>
                                 )}
                             </div>
-
+                            
                             {/* 決済状況 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
                                     決済状況
                                 </label>
-
+                            
                                 <select
                                     value={data.payment_status}
                                     onChange={(e)=>
@@ -579,12 +592,12 @@ export default function ReservationCreateModal({
                                     <option value={0}>
                                         未決済
                                     </option>
-
+                                
                                     <option value={1}>
                                         決済済
                                     </option>
                                 </select>
-
+                                
                                 {errors.payment_status && (
                                     <p className="mt-1 text-sm text-red-600">
                                         {errors.payment_status}
@@ -593,23 +606,23 @@ export default function ReservationCreateModal({
                             </div>
                         </div>
                     </div>
-                    
-
+                            
+                            
                     <div className="mt-6 grid grid-cols-12 gap-6">
-
+                            
                         {/* 連絡先 */}
                         <div className="col-span-9 overflow-hidden rounded-xl border bg-white shadow-sm">
                             <div className="bg-gray-700 px-6 py-3 text-lg font-semibold text-white">
                                 連絡先
                             </div>
-                        
+                            
                             <div className="grid grid-cols-2 gap-6 p-6">
                                 {/* 電話番号 */}
                                 <div>
                                     <label className="mb-2 block text-sm font-semibold">
                                         電話番号
                                     </label>
-                        
+                            
                                     <input
                                         type="text"
                                         value={data.phone}
@@ -674,47 +687,47 @@ export default function ReservationCreateModal({
                                 
                         {/* 金額合計 */}
                         <div className="col-span-3 overflow-hidden rounded-xl border bg-white shadow-sm">
-                        
+                                
                             <div className="bg-blue-600 px-6 py-3 text-lg font-semibold text-white">
                                 合計
                             </div>
-                        
+                                
                             <div className="space-y-6 p-6">
-                        
+                                
                                 {/* 泊数 */}
                                 <div>
                                     <div className="text-sm text-gray-500">
                                         泊数
                                     </div>
-                        
+                                
                                     <div className="mt-2 text-3xl font-bold text-blue-600">
                                         {stayNights} 泊
                                     </div>
                                 </div>
-                        
+                                
                                 {/* 合計料金 */}
                                 <div>
                                     <div className="text-sm text-gray-500">
                                         合計料金
                                     </div>
-                        
+                                
                                     <div className="mt-2 text-3xl font-bold text-green-600">
                                         ¥{Number(totalPrice).toLocaleString()}
                                     </div>
                                 </div>
-                        
+                                
                                 {/* 金額調整 */}
                                 <div>
                                     <label className="mb-2 block text-sm font-semibold">
                                         金額調整
                                     </label>
-                        
+                                
                                     <input
                                         type="number"
-                                        value={data.total_price}
+                                        value={data.amount}
                                         onChange={(e) =>
                                             setData(
-                                                "total_price",
+                                                "amount",
                                                 e.target.value
                                             )
                                         }
@@ -724,8 +737,8 @@ export default function ReservationCreateModal({
                             </div>
                         </div>
                     </div>
-                    
-
+                                    
+                                    
                     {/* 備考 */}
                     <div className="mt-6 overflow-hidden rounded-xl border bg-white shadow-sm">
                         <div className="bg-gray-700 px-6 py-3 text-lg font-semibold text-white">
@@ -753,7 +766,7 @@ export default function ReservationCreateModal({
                         </div>
                     </div>
                 </form>
-
+                        
                 {/* フッター */}
                 <div className="sticky bottom-0 flex items-center justify-between border-t bg-white px-8 py-5">
                     {/* 左側 */}
@@ -773,7 +786,7 @@ export default function ReservationCreateModal({
                             </>
                         )}
                     </div>
-
+                    
                     {/* 右側 */}
                     <div className="flex gap-3">
                         <button
@@ -785,7 +798,7 @@ export default function ReservationCreateModal({
                         </button>
                         <button
                             type="submit"
-                            onClick={submit}
+                            form="reservation-form"
                             disabled={
                                 processing ||
                                 !data.room_id ||
@@ -802,5 +815,6 @@ export default function ReservationCreateModal({
                 </div>
             </div>
         </div>
-    );
-}
+    );  
+}   
+    

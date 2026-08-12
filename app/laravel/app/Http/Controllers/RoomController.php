@@ -45,9 +45,19 @@ class RoomController extends Controller
             'checkin_time' => ['required', 'date_format:H:i'],
             'checkout_time' => ['required', 'date_format:H:i'],
             'note' => ['nullable', 'string'],
+            'image'=>'nullable|image|max:4096',
         ]);
 
+        if ($request->hasFile('image')) {
+
+            $validated['image'] = $request
+                ->file('image')
+                ->store('rooms', 'public');
+
+        }
+
         Room::create($validated);
+
 
         return redirect()
             ->route('rooms.index')
@@ -77,6 +87,7 @@ class RoomController extends Controller
      */
     public function update(Request $request, Room $room)
     {
+
         $validated = $request->validate([
             'name' => ['required', 'max:255'],
             'room_number' => [
@@ -88,10 +99,19 @@ class RoomController extends Controller
             'capacity_max' => ['required', 'integer'],
             'adult_price' => ['required', 'integer', 'min:0'],
             'child_price' => ['required', 'integer', 'min:0'],
-            'checkin_time' => ['required', 'date_format:H:i'],
-            'checkout_time' => ['required', 'date_format:H:i'],
+            'checkin_time' => ['required', 'date_format:H:i:s'],
+            'checkout_time' => ['required', 'date_format:H:i:s'],
             'note' => ['nullable', 'string'],
+            'image'=>'nullable|image|max:4096',
         ]);
+
+        if ($request->hasFile('image')) {
+
+            $validated['image'] = $request
+                ->file('image')
+                ->store('rooms', 'public');
+
+        }
 
         $room->update($validated);
 
