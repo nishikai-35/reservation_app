@@ -4,7 +4,6 @@ namespace App\Services\Importers;
 
 use App\Models\Reservation;
 use App\Models\Room;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Services\RoomAvailabilityService;
 
@@ -23,13 +22,8 @@ class JalanImporter
         string $path,
         array $selectedReservationNumbers = [] 
     ): int {
-
-        Log::info('Jalan import start', [
-            'selectedReservationNumbers' => $selectedReservationNumbers,
-        ]);
     
         if (empty($selectedReservationNumbers)) {
-            Log::warning('Jalan import: selectedReservationNumbers is empty');
             return 0;
         }
 
@@ -38,11 +32,6 @@ class JalanImporter
             $path,
             true
         );
-
-        Log::info('Jalan parsed reservations', [
-            'count' => count($reservations),
-            'reservations' => $reservations,
-        ]);
 
         // 選択された予約だけに絞り込む
         $reservations = array_filter(
@@ -60,11 +49,6 @@ class JalanImporter
         // array_filter後のキーを振り直す
         $reservations = array_values($reservations);
 
-        Log::info('Jalan selected reservations', [
-            'count' => count($reservations),
-            'reservations' => $reservations,
-        ]);
-
         DB::beginTransaction();
 
         try {
@@ -72,22 +56,12 @@ class JalanImporter
             $importedCount = 0;
             foreach ($reservations as $data) {
 
-                Log::info('Jalan import processing', [
-                    'reservation_number' => $data['reservation_number'],
-                    'can_import' => $data['can_import'] ?? null,
-                    'import_error' => $data['import_error'] ?? null,
-                ]);
-
                 // プレビュー時点で登録不可の予約は登録しない
                 if ( 
                     isset($data['can_import'])
                     && !$data['can_import']
                 ) { 
 
-                    Log::warning('Jalan import skipped: can_import=false', [
-                        'reservation_number' => $data['reservation_number'],
-                        'import_error' => $data['import_error'] ?? null,
-                    ]);
                     continue;
                 }
 
@@ -98,20 +72,8 @@ class JalanImporter
                     $data['checkout_date'], 
                 );
 
-                Log::info('Jalan final availability check', [
-                    'reservation_number' => $data['reservation_number'],
-                    'room_id' => $data['room_id'],
-                    'checkin_date' => $data['checkin_date'],
-                    'checkout_date' => $data['checkout_date'],
-                    'is_available' => $isAvailable,
-                ]);
-
                 // ダブルブッキングになった場合は登録しない
                 if (!$isAvailable) { 
-
-                    Log::warning('Jalan import skipped: unavailable', [
-                        'reservation_number' => $data['reservation_number'],
-                    ]);
                     continue;
                 }
 
@@ -121,36 +83,15 @@ class JalanImporter
                     $data['import_error']
                 );
 
-                Log::info('Jalan updateOrCreate', [
-                    'reservation_number' => $data['reservation_number'],
-                    'data' => $data,
-                ]);
-
                 $reservation = Reservation::updateOrCreate(
                     ['reservation_number' => $data['reservation_number'],],
                     $data
                 );
 
-                Log::info('Jalan reservation saved', [
-                    'reservation_id' => $reservation->id,
-                    'reservation_number' => $reservation->reservation_number,
-                    'room_id' => $reservation->room_id,
-                    'checkin_date' => $reservation->checkin_date,
-                    'checkout_date' => $reservation->checkout_date,
-                ]);
-
                 $importedCount++;
             }
 
-            Log::info('Jalan import before commit', [
-                'importedCount' => $importedCount,
-            ]);
-
             DB::commit();
-
-            Log::info('Jalan import committed', [
-                'importedCount' => $importedCount,
-            ]);
 
             return $importedCount;
 

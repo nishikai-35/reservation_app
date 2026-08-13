@@ -9,9 +9,7 @@ use App\Models\Room;
 class RoomAvailabilityService
 {
 
-    /**
-     * 指定期間の空室一覧取得
-     */
+    // 指定期間の空室一覧取得
     public function getAvailableRooms(
         string $checkin,
         string $checkout
@@ -57,16 +55,13 @@ class RoomAvailabilityService
     }
 
 
-    /**
-     * 指定部屋が予約可能か確認
-     */
+    // 指定部屋が予約可能か確認
     public function check(
         int $roomId,
         string $checkin,
         string $checkout,
         ?int $excludeReservationId = null
     ): bool {
-
 
         $query = Reservation::where(
                 'room_id',
@@ -88,7 +83,6 @@ class RoomAvailabilityService
                 $checkin
             );
 
-
         // 編集時は自分自身を除外
         if ($excludeReservationId) {
 
@@ -99,7 +93,6 @@ class RoomAvailabilityService
             );
 
         }
-
 
         return !$query->exists();
     }

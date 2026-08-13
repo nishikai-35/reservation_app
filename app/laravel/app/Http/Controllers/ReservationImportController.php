@@ -91,13 +91,10 @@ class ReservationImportController extends Controller
             ],
         ]);
 
-
         $file = $request->file('csv');
 
-        // 一時保存
+        // 一時保存・絶対パス取得
         $path = $file->store('imports', 'local');
-
-        // 絶対パス取得
         $fullPath = storage_path(
             'app/private/'.$path
         );

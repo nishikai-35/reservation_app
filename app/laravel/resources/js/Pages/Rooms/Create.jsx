@@ -3,6 +3,7 @@ import { Head, useForm } from '@inertiajs/react';
 
 export default function Create({ auth }) {
 
+    // 初期値
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         room_number: '',
@@ -16,6 +17,8 @@ export default function Create({ auth }) {
         image: null,
     });
 
+
+    // 登録
     const submit = (e) => {
         
         e.preventDefault();
@@ -23,6 +26,7 @@ export default function Create({ auth }) {
             forceFormData:true,
         });
     };
+
 
     return (
         <AuthenticatedLayout
@@ -155,7 +159,6 @@ export default function Create({ auth }) {
                             </div>
                         </div>
 
-
                         {/* 部屋画像アップロード */}
                         <div className="bg-white rounded-xl border shadow-sm mb-6">
                             <div className="px-6 py-4 border-b">
@@ -177,7 +180,6 @@ export default function Create({ auth }) {
                                 </div>
                             </div>
                         </div>
-
                                     
                         {/* 料金カード */}
                         <div className="bg-white rounded-xl border shadow-sm mb-6">

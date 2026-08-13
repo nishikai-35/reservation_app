@@ -19,6 +19,7 @@ export default function Import({ auth }) {
         reservation_numbers: [],
     });
 
+    // ファイル名、メッセージ、プレビューデータ、予約選択の状態管理
     const [fileName, setFileName] = useState("");
     const [message, setMessage] = useState(null);
     const [messageType, setMessageType] = useState(null);
@@ -126,6 +127,7 @@ export default function Import({ auth }) {
         });
     };
 
+
     // 全選択
     const selectAllReservations = () => {
         const availableReservations = 
@@ -136,10 +138,12 @@ export default function Import({ auth }) {
         setSelectedReservations(availableReservations);
     };
 
+
     // 全解除
     const deselectAllReservations = () => {
         setSelectedReservations([]);
     };
+
 
     // インポートデータ登録
     const submit = (e) => {
@@ -154,11 +158,6 @@ export default function Import({ auth }) {
             alert("インポートする予約を選択してください。");
             return;
         }
-
-        // console.log(
-        //     "登録直前 selectedReservations:",
-        //     selectedReservations
-        // );
 
         setData(
             "reservation_numbers",
@@ -194,6 +193,7 @@ export default function Import({ auth }) {
             }
         );
     };
+
 
     return (
         <AuthenticatedLayout

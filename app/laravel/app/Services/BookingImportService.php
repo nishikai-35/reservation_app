@@ -32,7 +32,6 @@ class BookingImportService
         array $selectedReservationNumbers = []
     ): int {
     
-        // dd($selectedReservationNumbers);
         $importer = $this->getImporter($path);
 
         return $importer->import(
@@ -99,10 +98,6 @@ class BookingImportService
             );
         }
 
-        // dd([
-        //     'encoding' => $encoding,
-        //     'header' => $header,
-        // ]);
 
         // Booking.com
         if (
@@ -112,6 +107,7 @@ class BookingImportService
             return $this->bookingImporter;
         }
 
+
         // じゃらん
         if (
             in_array('部屋タイプ名称', $header) &&
@@ -120,6 +116,7 @@ class BookingImportService
             return $this->jalanImporter;
         }
 
+        // その他CSVファイル
         throw new \Exception(
             '対応していないCSV形式です。'
         );

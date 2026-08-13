@@ -2,6 +2,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Edit({ auth, reservation, rooms = [] }) {
+
+    // ステータス定義
     const statusLabels = {
         1: '予約済み',
         2: 'チェックイン済み',
@@ -12,6 +14,7 @@ export default function Edit({ auth, reservation, rooms = [] }) {
         9: 'キャンセル',
     };
 
+    // 日付データ管理
     const formatDate = (value) => {
         if (!value) {
             return '';
@@ -20,6 +23,7 @@ export default function Edit({ auth, reservation, rooms = [] }) {
         return value.substring(0, 10);
     };
 
+    // 初期値
     const { data, setData, put, processing, errors } = useForm({
         room_id: reservation.room_id ?? '',
         checkin_date: formatDate(reservation.checkin_date),
@@ -38,6 +42,7 @@ export default function Edit({ auth, reservation, rooms = [] }) {
         status: reservation.status ?? 1,
     });
 
+    // 更新
     const submit = (e) => {
         e.preventDefault();
 

@@ -34,7 +34,6 @@ export default function Index({ auth, reservations, rooms = [] }) {
     // 予約データ未取得の場合の対策
     const reservationList = reservations?.data ?? [];
 
-
     // 検索条件
     const [search, setSearch] = useState({
         reservation_number: '',
@@ -44,6 +43,7 @@ export default function Index({ auth, reservations, rooms = [] }) {
         from_date: '',
         to_date: '',
     });
+
 
     // 検索処理
     const handleSearchChange = (e) => {
@@ -254,7 +254,6 @@ export default function Index({ auth, reservations, rooms = [] }) {
                             </div>
                         </form>
                     </div>
-
 
                     {/* 一覧カード */}
                     <div className="flex flex-col rounded-xl border bg-white shadow-sm h-[620px]">
@@ -467,7 +466,6 @@ export default function Index({ auth, reservations, rooms = [] }) {
                             ))}
                         </div>
                     )}
-
 
                     {/* モーダル表示 */}
                     {showCreateModal && (

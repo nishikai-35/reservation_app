@@ -4,12 +4,15 @@ import { useState } from 'react';
 
 export default function Index({ auth, users, flash, filters }) {
 
+    // 削除
     const handleDelete = (id) => {
         if (confirm('このユーザーを削除しますか？')) {
             router.delete(route('users.destroy', id));
         }
     };
 
+
+    // 検索条件の初期値設定、保持、検索処理
     const [values, setValues] = useState({
         name: filters.name || '',
         email: filters.email || '',
@@ -27,9 +30,9 @@ export default function Index({ auth, users, flash, filters }) {
             name: '',
             email: '',
         });
-
         router.get(route('users.index'));
     };
+
 
     return (
         <AuthenticatedLayout
@@ -69,11 +72,8 @@ export default function Index({ auth, users, flash, filters }) {
                             </div>
                         )}
 
-                        {/* ===========================
-                            検索条件カード
-                        ============================ */}
+                        {/* 検索条件カード */}
                         <div className="bg-white shadow rounded-lg">
-
                             <div className="border-b px-6 py-4">
                                 <h3 className="text-lg font-semibold">
                                     検索条件
@@ -81,9 +81,7 @@ export default function Index({ auth, users, flash, filters }) {
                             </div>
 
                             <div className="p-6">
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                                     <div>
                                         <label className="block text-sm font-medium mb-2">
                                             氏名
@@ -121,11 +119,9 @@ export default function Index({ auth, users, flash, filters }) {
                                             className="w-full rounded border-gray-300"
                                         />
                                     </div>
-
                                 </div>
 
                                 <div className="flex justify-end gap-3 mt-6">
-
                                     <button
                                         onClick={handleClear}
                                         className="px-5 py-2 border rounded-lg hover:bg-gray-100"
@@ -139,22 +135,14 @@ export default function Index({ auth, users, flash, filters }) {
                                     >
                                         検索
                                     </button>
-
                                 </div>
-
                             </div>
-
                         </div>
 
-                        {/* ===========================
-                            ユーザー一覧カード
-                        ============================ */}
+                        {/* ユーザー一覧カード */}
                         <div className="bg-white shadow rounded-lg">
-
                             <div className="border-b px-6 py-4 flex justify-between items-center">
-
                                 <div>
-
                                     <h3 className="text-lg font-semibold">
                                         ユーザー一覧
                                     </h3>
@@ -162,7 +150,6 @@ export default function Index({ auth, users, flash, filters }) {
                                     <p className="text-sm text-gray-500 mt-1">
                                         検索結果：{users.length}件
                                     </p>
-
                                 </div>
 
                                 <Link
@@ -171,15 +158,11 @@ export default function Index({ auth, users, flash, filters }) {
                                 >
                                     新規登録
                                 </Link>
-
                             </div>
 
                             <div className="overflow-x-auto">
-
                                 <table className="min-w-full">
-
                                     <thead className="bg-gray-200">
-
                                         <tr>
                                             <th className="px-4 py-3 text-left">ID</th>
                                             <th className="px-4 py-3 text-left">氏名</th>
@@ -187,20 +170,15 @@ export default function Index({ auth, users, flash, filters }) {
                                             <th className="px-4 py-3 text-left">登録日</th>
                                             <th className="px-4 py-3 text-center">操作</th>
                                         </tr>
-
                                     </thead>
 
                                     <tbody>
-
                                         {users.length > 0 ? (
-
                                             users.map((user) => (
-
                                                 <tr
                                                     key={user.id}
                                                     className="border-t hover:bg-gray-50"
                                                 >
-
                                                     <td className="px-4 py-3">
                                                         {user.id}
                                                     </td>

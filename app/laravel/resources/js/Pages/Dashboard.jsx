@@ -8,17 +8,14 @@ import { useState } from 'react';
 export default function Dashboard({
     auth,
     rooms = [],
-    today,
     totalRooms,
-    todayCheckinCount,
-    todayCheckoutCount,
     stayingCount,
     checkinReservations = [],
     checkoutReservations = [],
     stayingReservations = [],
-    
 }) {
 
+    // ステータス定義
     const statusLabels = {
         1: '予約済み',
         2: 'チェックイン済み',
@@ -51,13 +48,7 @@ export default function Dashboard({
 
 
     // モーダルの表示状態を管理
-    const [selectedReservation, setSelectedReservation] = useState(null);
-    const { auth: pageAuth } = usePage().props;
     const [showCreateModal, setShowCreateModal] = useState(false);
-
-
-    // role情報確認用
-    console.log(pageAuth);
 
 
     // 予約テーブル表示
@@ -200,7 +191,7 @@ export default function Dashboard({
                 style={{backgroundImage: "url('/images/dashboard-bg.jpg')",}}
             >
                 <div className="mx-auto max-w-7xl rounded-2xl bg-white/70 p-6 backdrop-blur-sm">
- 
+
                     {/* タイトル */}
                     <div className="rounded-2xl border bg-white p-6 shadow-sm">
                         <div className="mb-8 flex items-start justify-between">
@@ -283,7 +274,7 @@ export default function Dashboard({
                         </div>
                     </div>
 
-
+                    {/* 予約テーブル */}
                     <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
                         <ReservationTable
                             title="本日のチェックイン予定"

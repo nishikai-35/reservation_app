@@ -23,7 +23,6 @@ class BookingComImporter
         array $selectedReservationNumbers = [] 
     ): int {
 
-        // dd($selectedReservationNumbers);
         if (empty($selectedReservationNumbers)) {
             return 0;
         }
@@ -33,14 +32,6 @@ class BookingComImporter
             $path,
             true
         );
-
-        // dd([
-        //     'selected' => $selectedReservationNumbers,
-        //     'parsed_numbers' => array_column(
-        //         $reservations,
-        //         'reservation_number'
-        //     ),
-        // ]);
 
         // 選択された予約だけに絞り込む
         $reservations = array_filter(

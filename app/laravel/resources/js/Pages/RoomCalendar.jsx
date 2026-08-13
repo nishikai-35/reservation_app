@@ -12,6 +12,7 @@ export default function RoomCalendar({
     rooms = [],
     reservations = [],
 }) {
+
     // 表示開始日
     const today = new Date();
     today.setDate(
@@ -19,8 +20,8 @@ export default function RoomCalendar({
     );
 
     const [startDate,setStartDate]=useState(today);
-    
 
+    
     // 表示モード
     const [viewMode, setViewMode] = useState('week');
 
@@ -109,7 +110,7 @@ export default function RoomCalendar({
         9: 'キャンセル',
     };
 
-    // 宿泊者表示セル幅
+    // 宿泊者表示セル幅　設定
     const ROOM_WIDTH = 200;
 
     const CELL_WIDTH =
@@ -293,7 +294,6 @@ export default function RoomCalendar({
 
                     {/* カレンダーカード */}
                     <div className="flex flex-col flex-1 rounded-2xl border bg-white shadow-sm overflow-visible">
-
                         <div className="border-b p-5">
                             <h2 className="text-lg font-semibold">
                                 予約状況（{formatDate(dates[0])} ～ {formatDate(dates[dates.length - 1])}）

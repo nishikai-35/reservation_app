@@ -3,6 +3,7 @@ import { Head, useForm } from '@inertiajs/react';
 
 export default function Create({ auth }) {
 
+    // フォーム入力値、送信状態管理
     const {
         data,
         setData,
@@ -15,6 +16,7 @@ export default function Create({ auth }) {
     });
 
 
+    // 登録
     const submit = (e) => {
         e.preventDefault();
 
@@ -48,6 +50,7 @@ export default function Create({ auth }) {
             <div className="py-8 bg-gray-50 min-h-screen px-4 sm:px-6">
                 <div className="max-w-3xl mx-auto">
                     <div className="bg-white rounded-xl border shadow-sm">
+
                         {/* カードヘッダー */}
                         <div className="px-6 py-4 border-b">
                             <h3 className="font-bold text-lg">
@@ -63,6 +66,7 @@ export default function Create({ auth }) {
                             onSubmit={submit}
                             className="p-6"
                         >
+
                             {/* 名前 */}
                             <div className="mb-5">
                                 <label
@@ -89,13 +93,10 @@ export default function Create({ auth }) {
                                         {errors.name}
                                     </p>
                                 )}
-
                             </div>
 
                             {/* メール */}
                             <div className="mb-5">
-
-
                                 <label
                                     htmlFor="email"
                                     className="block text-sm font-medium text-gray-700 mb-1"

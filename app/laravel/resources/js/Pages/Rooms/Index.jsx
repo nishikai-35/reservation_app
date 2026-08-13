@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 
 export default function Index({ auth, rooms }) {
 
+    // 削除
     const deleteRoom = (id) => {
         if (!confirm('削除してもよろしいですか？')) {
             return;
@@ -13,6 +14,7 @@ export default function Index({ auth, rooms }) {
         );
     };
 
+    
     return (
         <AuthenticatedLayout
             user={auth.user}

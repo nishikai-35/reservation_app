@@ -1,7 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router } from "@inertiajs/react";
 import { useState } from "react";
-
 import {
     LineChart,
     Line,
@@ -13,16 +12,19 @@ import {
     Legend,
 } from "recharts";
 
+
 export default function Analysis({
     auth,
     summary,
     chartData,
 }) {
-    // console.log(summary);
 
+    // 年月データ　管理
     const [year, setYear] = useState(summary.year);
     const [month, setMonth] = useState(summary.month);
 
+
+    // グラフ表示用データ整形
     const occupancyData = (chartData ?? []).map((item) => ({
         month: item.month,
         current: item.occupancy,
@@ -40,7 +42,7 @@ export default function Analysis({
         <AuthenticatedLayout
             user={auth.user}
         >
-            <Head title="集計" />
+            <Head title="集計"/>
             <div
                 className="min-h-screen bg-cover bg-center bg-fixed py-8"
                 style={{backgroundImage: "url('/images/dashboard-bg.jpg')",}}

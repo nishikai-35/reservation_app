@@ -3,6 +3,8 @@ import { Head, useForm } from '@inertiajs/react';
 
 
 export default function Edit({ auth, user }) {
+
+    // フォーム入力値、送信状態管理
     const {
         data,
         setData,
@@ -15,7 +17,8 @@ export default function Edit({ auth, user }) {
         role: user.role ?? '',
     });
 
-
+    
+    // 更新
     const submit = (e) => {
         e.preventDefault();
 

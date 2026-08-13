@@ -3,6 +3,7 @@ import { Head, useForm } from '@inertiajs/react';
 
 export default function Create({ auth, room }) {
 
+    // 初期値
     const { data, setData, post, processing, errors } = useForm({
         name: room?.name ?? '',
         room_number: room?.room_number ?? '',
@@ -17,7 +18,8 @@ export default function Create({ auth, room }) {
         _method: 'put',
     });
 
-
+    
+    // 登録
     const submit = (e) => {
         e.preventDefault();
     
