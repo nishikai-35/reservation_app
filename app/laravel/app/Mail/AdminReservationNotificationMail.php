@@ -21,7 +21,7 @@ class AdminReservationNotificationMail extends Mailable
         $this->reservation = $reservation;
     }
 
-
+    // メール件名、本文作成
     public function build()
     {
         return $this

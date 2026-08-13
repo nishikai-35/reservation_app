@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -15,21 +14,16 @@ class UserPasswordSetupMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-
-    public $user;
-    public $url;
-
-
     public function __construct(
-        User $user,
-        string $url
+        public User $user,
+        public string $url
     )
     {
         $this->user = $user;
         $this->url = $url;
     }
 
-
+    // メール件名、ヘッダー情報
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -38,6 +32,7 @@ class UserPasswordSetupMail extends Mailable
     }
 
 
+    // メール本文
     public function content(): Content
     {
         return new Content(
@@ -46,6 +41,7 @@ class UserPasswordSetupMail extends Mailable
     }
 
 
+    // 添付ファイル
     public function attachments(): array
     {
         return [];

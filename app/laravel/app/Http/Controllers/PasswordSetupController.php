@@ -35,6 +35,7 @@ class PasswordSetupController extends Controller
 
     public function store(Request $request)
     {
+        // 入力チェック
         $validated = $request->validate([
             'token' => [
                 'required',
@@ -47,22 +48,18 @@ class PasswordSetupController extends Controller
             ],
         ]);
     
-    
+        // 初回パスワード設定時　URL確認
         $passwordSetupToken =
             PasswordSetupToken::where(
                 'token',
                 $validated['token']
             )->first();
     
-    
         if (!$passwordSetupToken) {
-    
             return back()->withErrors([
                 'token' => '無効なURLです。',
             ]);
-    
         }
-    
     
         if (
             $passwordSetupToken->expires_at
@@ -75,11 +72,10 @@ class PasswordSetupController extends Controller
     
         }
     
-    
+        // 初回パスワード設定の完了処理
         $user = User::find(
             $passwordSetupToken->user_id
         );
-    
     
         $user->update([
             'password' => Hash::make(
@@ -87,9 +83,7 @@ class PasswordSetupController extends Controller
             ),
         ]);
     
-    
         $passwordSetupToken->delete();
-    
     
         return redirect()
             ->route('login')

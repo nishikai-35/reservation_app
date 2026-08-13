@@ -99,6 +99,7 @@ class ReservationImportController extends Controller
             'app/private/'.$path
         );
 
+        // 一時保存ファイルの削除処理
         try {
 
             $data = $this->bookingImportService

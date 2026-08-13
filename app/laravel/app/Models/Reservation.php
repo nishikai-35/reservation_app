@@ -9,6 +9,7 @@ class Reservation extends Model
 {
     use HasFactory;
 
+    // 予約データ　項目定義
     protected $fillable = [
         'room_id',
         'reservation_number',
@@ -29,6 +30,7 @@ class Reservation extends Model
         'note',
         'status',
     ];
+
 
     //　日付、数値等の扱いやすくするためのキャスト定義
     protected $casts = [

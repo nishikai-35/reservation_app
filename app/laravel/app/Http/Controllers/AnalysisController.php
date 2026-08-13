@@ -17,8 +17,6 @@ class AnalysisController extends Controller
         $year = $request->year ?? now()->year;
         $month = $request->month ?? now()->month;
 
-        // dd($request->all());
-
         // 対象月の予約取得
         $reservations = Reservation::with('room')
             ->whereYear('checkin_date', $year)
@@ -45,6 +43,7 @@ class AnalysisController extends Controller
         | 稼働率計算
         |--------------------------------------------------------------------------
         */
+
         $roomCount = Room::count();
 
         // 対象月の日数
@@ -238,6 +237,7 @@ class AnalysisController extends Controller
             )
             ->where('status', '!=', 9)
             ->get();
+            
 
             // 本年稼働率
             $currentDaysInMonth = Carbon::create(
@@ -273,6 +273,7 @@ class AnalysisController extends Controller
                 );
             }
 
+
             // 前年売上
             $previousReservations = Reservation::whereYear(
                 'checkin_date',
@@ -284,6 +285,7 @@ class AnalysisController extends Controller
             )
             ->where('status', '!=', 9)
             ->get();
+
 
             // 前年稼働率
             $previousDaysInMonth = Carbon::create(
@@ -318,6 +320,7 @@ class AnalysisController extends Controller
                     1
                 );
             }
+
 
             // 各比較集計処理
             $comparisonData[] = [
@@ -375,11 +378,10 @@ class AnalysisController extends Controller
     // CSVエクスポート
     public function export(Request $request)
     {
+        // 初期変数
         $year = $request->year ?? now()->year;
         $month = $request->month ?? now()->month;
-
         $roomCount = Room::count();
-
         $daysInMonth = Carbon::create(
             $year,
             $month
@@ -387,6 +389,8 @@ class AnalysisController extends Controller
 
         $dailyData = [];
 
+
+        // 毎日の集計処理
         for ($day = 1; $day <= $daysInMonth; $day++) {
 
             $date = Carbon::create(
@@ -434,6 +438,7 @@ class AnalysisController extends Controller
             ];
         }
 
+
         // 集計値
         $totalSales = collect($dailyData)->sum('sales');
         $totalGuests = collect($dailyData)->sum('guests');
@@ -442,6 +447,8 @@ class AnalysisController extends Controller
             1
         );
 
+
+        // ファイル名、ヘッダー設定
         $fileName = 'analysis.csv';
 
         $headers = [
@@ -450,6 +457,7 @@ class AnalysisController extends Controller
         ];
         
 
+        // CSV出力における事前処理
         $callback = function () use (
             $dailyData,
             $year,
@@ -459,7 +467,7 @@ class AnalysisController extends Controller
             $averageOccupancy
         ) {
             
-              $file = fopen('php://output', 'w');
+            $file = fopen('php://output', 'w');
 
             // UTF-8 → CP932（Excel対応）
             stream_filter_append(
@@ -530,6 +538,7 @@ class AnalysisController extends Controller
 
             fclose($file);
         };
+
 
         return response()->stream(
             $callback,

@@ -9,6 +9,7 @@ class Room extends Model
 {
     use HasFactory;
 
+    // 項目定義
     protected $fillable = [
         'name',
         'room_number',

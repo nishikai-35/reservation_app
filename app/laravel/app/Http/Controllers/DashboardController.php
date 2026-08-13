@@ -10,6 +10,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // 今日の日付取得
         $today = now()->toDateString();
 
         // 本日チェックイン

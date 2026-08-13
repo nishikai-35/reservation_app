@@ -44,8 +44,9 @@ class ReservationController extends Controller
                     if ($start && $end) {
 
                         // 期間と重なる予約を取得
-                        $query->whereDate('checkin_date', '<=', $end)
-                              ->whereDate('checkout_date', '>=', $start);
+                        $query
+                            ->whereDate('checkin_date', '<=', $end)
+                            ->whereDate('checkout_date', '>=', $start);
 
                     } elseif ($start) {
 

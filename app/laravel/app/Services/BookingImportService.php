@@ -19,6 +19,7 @@ class BookingImportService
     }
 
 
+    // CSV処理プレビュー
     public function preview(string $path): array
     {
         $importer = $this->getImporter($path);
@@ -27,6 +28,7 @@ class BookingImportService
     }
 
 
+    // インポートデータの解析、DB保存、インポート件数
     public function import(
         string $path,
         array $selectedReservationNumbers = []
@@ -41,6 +43,7 @@ class BookingImportService
     }
 
 
+    // CSV判定    
     private function getImporter(string $path)
     {
         // csvファイル文字コード確認

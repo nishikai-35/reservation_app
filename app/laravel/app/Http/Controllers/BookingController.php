@@ -58,9 +58,9 @@ class BookingController extends Controller
             ->orderBy('room_number')
             ->get();
 
-                return response()->json([
-                    'rooms' => $rooms,
-                ]);
+        return response()->json([
+            'rooms' => $rooms,
+        ]);
     }
 
 

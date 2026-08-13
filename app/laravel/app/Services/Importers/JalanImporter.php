@@ -51,8 +51,8 @@ class JalanImporter
 
         DB::beginTransaction();
 
+        // 予約データ保存前の事前処理
         try {
-
             $importedCount = 0;
             foreach ($reservations as $data) {
 
