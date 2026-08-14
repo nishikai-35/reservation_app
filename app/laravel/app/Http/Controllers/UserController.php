@@ -3,13 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\PasswordSetupToken;
-use App\Mail\UserPasswordSetupMail;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 
 use Inertia\Inertia;
 
@@ -72,47 +68,18 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
         ]);
 
         // ユーザー作成
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-
-            // 仮パスワード
-            'password'=>Hash::make(
-                Str::random(16)
-            ),
+            'password' => Hash::make($validated['password']),
         ]);
 
         // 一般ユーザー権限付与
         $user->assignRole('user');
-    
-        
-        // パスワード設定用トークン作成
-        $token = Str::random(64);
-
-        PasswordSetupToken::create([
-            'user_id' => $user->id,
-            'token' => $token,
-            'expires_at' => now()
-                ->addDay(),
-        ]);
-
-        $url = route(
-            'password.setup',
-            [
-                'token' => $token
-            ]
-        );
-
-        Mail::to($user->email)
-            ->send(
-                new UserPasswordSetupMail(
-                    $user,
-                    $url
-                )
-        );
 
         return redirect()
             ->route('users.index')

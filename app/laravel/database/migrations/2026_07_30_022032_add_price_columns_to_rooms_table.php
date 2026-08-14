@@ -8,29 +8,29 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('rooms', function (Blueprint $table) {
+        // Schema::table('rooms', function (Blueprint $table) {
 
-            $table->integer('adult_price')
-                ->default(0)
-                ->after('capacity_max');
+        //     $table->integer('adult_price')
+        //         ->default(0)
+        //         ->after('capacity_max');
 
-            $table->integer('child_price')
-                ->default(0)
-                ->after('adult_price');
+        //     $table->integer('child_price')
+        //         ->default(0)
+        //         ->after('adult_price');
 
-        });
+        // });
     }
 
 
     public function down(): void
     {
-        Schema::table('rooms', function (Blueprint $table) {
+        // Schema::table('rooms', function (Blueprint $table) {
 
-            $table->dropColumn([
-                'adult_price',
-                'child_price'
-            ]);
+        //     $table->dropColumn([
+        //         'adult_price',
+        //         'child_price'
+        //     ]);
 
-        });
+        // });
     }
 };

@@ -13,6 +13,7 @@ export default function Create({ auth }) {
     } = useForm({
         name: '',
         email: '',
+        password: '',
     });
 
 
@@ -119,6 +120,34 @@ export default function Create({ auth }) {
                                 {errors.email && (
                                     <p className="text-red-500 text-sm mt-1">
                                         {errors.email}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* パスワード */}
+                            <div className="mb-5">
+                                <label
+                                    htmlFor="password"
+                                    className="block text-sm font-medium text-gray-700 mb-1"
+                                >
+                                    パスワード
+                                </label>
+
+                                <input
+                                    id="password"
+                                    type="password"
+                                    value={data.password}
+                                    onChange={(e)=>
+                                        setData(
+                                            'password',
+                                            e.target.value
+                                        )
+                                    }
+                                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                />
+                                {errors.password && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.password}
                                     </p>
                                 )}
                             </div>
