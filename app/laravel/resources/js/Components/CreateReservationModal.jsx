@@ -121,6 +121,7 @@ export default function ReservationCreateModal({
     }, [
         availableRooms,
     ]);
+    
 
     // 選択中の部屋取得
     const selectedRoom = useMemo(() => {
@@ -259,7 +260,7 @@ export default function ReservationCreateModal({
                         className="text-3xl hover:text-gray-300"
                     >
                         ×
-                     </button>
+                    </button>
                 </div>
     
                 {/* フォーム */}
