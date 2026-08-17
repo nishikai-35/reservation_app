@@ -7,8 +7,9 @@ import { useState } from 'react';
 export default function AuthenticatedLayout({ header, children }) {
 
     const { auth } = usePage().props;
-
     const user = auth.user;
+
+    console.log(auth.user);
 
     const isAdmin =
         auth.roles.includes('admin');
@@ -144,9 +145,9 @@ export default function AuthenticatedLayout({ header, children }) {
                             <Dropdown.Content>
                             
                                 <Dropdown.Link
-                                    href={route('profile.edit')}
+                                    href={route('users.edit', user.id)}
                                 >
-                                    プロフィール
+                                    ユーザー情報編集
                                 </Dropdown.Link>
                             
                                 <Dropdown.Link

@@ -92,8 +92,18 @@ Route::get('/booking/complete', function () {
 // 認証グループ(管理者)
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
-    // usersルート
-    Route::resource('users', UserController::class);
+    // users管理ルート
+    Route::get('/users', [UserController::class, 'index'])
+        ->name('users.index');
+
+    Route::get('/users/create', [UserController::class, 'create'])
+        ->name('users.create');
+
+    Route::post('/users', [UserController::class, 'store'])
+        ->name('users.store');
+
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])
+        ->name('users.destroy');
 
     // roomsルート
     Route::resource('rooms', RoomController::class);
@@ -122,6 +132,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 // 認証グループ(ログインユーザー共通)
 Route::middleware('auth')->group(function () {
+
+    // Users編集
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])
+        ->name('users.edit');
+
+    Route::put('/users/{user}', [UserController::class, 'update'])
+        ->name('users.update');
 
     // proflileルート
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

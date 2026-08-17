@@ -4,6 +4,12 @@ import { Head, useForm } from '@inertiajs/react';
 
 export default function Edit({ auth, user }) {
 
+    // 管理者かどうか
+    const isAdmin = auth.roles?.includes('admin');
+
+    // 自分自身かどうか
+    const isSelf = auth.user.id === user.id;
+
     // フォーム入力値、送信状態管理
     const {
         data,
@@ -14,6 +20,7 @@ export default function Edit({ auth, user }) {
     } = useForm({
         name: user.name ?? '',
         email: user.email ?? '',
+        password: '',
         role: user.role ?? '',
     });
 
@@ -44,11 +51,20 @@ export default function Edit({ auth, user }) {
             user={auth.user}
             header={
                 <h2 className="font-semibold text-xl text-gray-800">
-                    ユーザー編集
+                    {isSelf && !isAdmin
+                        ? 'プロフィール編集'
+                        : 'ユーザー編集'
+                    }
                 </h2>
             }
         >
-            <Head title="ユーザー編集" />
+            <Head 
+                title={
+                    isSelf && !isAdmin
+                        ? 'プロフィール編集'
+                        : 'ユーザー編集'
+                }
+            />
 
             <div className="py-8 bg-gray-50 min-h-screen px-4 sm:px-6">
                 <div className="max-w-3xl mx-auto">
@@ -57,11 +73,17 @@ export default function Edit({ auth, user }) {
                         {/* カードヘッダー */}
                         <div className="px-6 py-4 border-b">
                             <h3 className="font-bold text-lg">
-                                ユーザー情報編集
+                                {isSelf && !isAdmin
+                                    ? 'プロフィール情報'
+                                    : 'ユーザー情報編集'
+                                }
                             </h3>
 
                             <p className="text-sm text-gray-500 mt-1">
-                                ユーザー情報と権限を変更できます。
+                                {isSelf && !isAdmin
+                                    ? 'プロフィール情報を変更できます。'
+                                    : 'ユーザー情報と権限を変更できます。'
+                                }
                             </p>
                         </div>
 
@@ -124,44 +146,76 @@ export default function Edit({ auth, user }) {
                                     </p>
                                 )}
                             </div>
-                            
-                            {/* 権限 */}
+
+                            {/* パスワード */}
                             <div className="mb-5">
                                 <label
+                                    htmlFor="password"
                                     className="block text-sm font-medium text-gray-700 mb-1"
                                 >
-                                    権限
+                                    パスワード
                                 </label>
-                            
-                                <select
-                                    value={data.role}
+
+                                <input
+                                    id="password"
+                                    type="password"
+                                    value={data.password}
                                     onChange={(e)=>
                                         setData(
-                                            'role',
+                                            'password',
                                             e.target.value
                                         )
                                     }
                                     className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                >
-                                    <option value="">
-                                        選択してください
-                                    </option>
-                                
-                                    <option value="admin">
-                                        管理者
-                                    </option>
-                                
-                                    <option value="user">
-                                        ユーザー
-                                    </option>
-                                </select>
-                                
-                                {errors.role && (
+                                />
+                                {errors.password && (
                                     <p className="text-red-500 text-sm mt-1">
-                                        {errors.role}
+                                        {errors.password}
                                     </p>
                                 )}
                             </div>
+                            
+                            {/* 権限 */}
+                            {isAdmin && (
+                                <div className="mb-5">
+                                    <label
+                                        htmlFor="role"
+                                        className="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        権限
+                                    </label>
+
+                                    <select
+                                        id="role"
+                                        value={data.role}
+                                        onChange={(e) =>
+                                            setData(
+                                                'role',
+                                                e.target.value
+                                            )
+                                        }
+                                        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    >
+                                        <option value="">
+                                            選択してください
+                                        </option>
+
+                                        <option value="admin">
+                                            管理者
+                                        </option>
+
+                                        <option value="user">
+                                            ユーザー
+                                        </option>
+                                    </select>
+
+                                    {errors.role && (
+                                        <p className="text-red-500 text-sm mt-1">
+                                            {errors.role}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                             
                             {/* ボタン */}
                             <div className="flex justify-end gap-3">
