@@ -1,6 +1,6 @@
 # 予約管理システム
 
-Laravel + Inertia.js + React + Tailwind CSS を使用した宿泊施設向け予約管理システムです。
+Laravel + PHP + React + Tailwind CSS を使用した宿泊施設向け予約管理システムです。
 
 予約情報の登録・編集・削除、部屋の空室管理、外部予約サイトからのCSVインポート、ユーザー管理、売上・予約データの集計などを行います。
 
@@ -38,7 +38,6 @@ Laravel + Inertia.js + React + Tailwind CSS を使用した宿泊施設向け予
 - Laravel 13
 - Laravel Inertia
 - MySQL
-- Composer
 
 ### Frontend
 
@@ -57,15 +56,10 @@ Laravel + Inertia.js + React + Tailwind CSS を使用した宿泊施設向け予
 
 - Windows
 - PowerShell
+- docker
 - Git
 - GitHub
 
-### 開発サーバー
-
-- FreeBSD
-- Apache
-- MySQL
-- PHP
 
 ---
 
@@ -112,4 +106,9 @@ reservation_app/
 │       ├── composer.json
 │       └── package.json
 │
+├── docker/
+│   ├── nginx/
+│   └── php/
+│
+├── docker-compose.yml
 └── README.md
