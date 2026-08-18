@@ -138,7 +138,7 @@ export default function ReservationCreateModal({
 
     }, [
         room,
-        rooms,
+        availableRooms,
         data.room_id,
     ]);
 
@@ -215,6 +215,27 @@ export default function ReservationCreateModal({
         data.child_count,
         setData,
     ]);
+
+
+    // 宿泊人数
+    const guestCount =
+        Number(data.adult_count || 0) +
+        Number(data.child_count || 0);
+
+    // 最大許容人数
+    const maxCapacity = selectedRoom?.capacity_max
+        ? Number(selectedRoom.capacity_max)
+        : null;
+
+    // 定員オーバー判定
+    const isOverCapacity =
+        maxCapacity !== null &&
+        guestCount > maxCapacity;
+
+    // エラーメッセージ
+    const capacityError = isOverCapacity
+        ? `選択した部屋の最大宿泊人数は${maxCapacity}人です。`
+        : '';
 
 
     // 登録処理
@@ -475,8 +496,17 @@ export default function ReservationCreateModal({
                                     type="number"
                                     value={data.guest_count}
                                     disabled
-                                    className="w-full rounded-lg border bg-gray-100 px-4 py-3"
+                                    className={`w-full rounded-lg border px-4 py-3 ${
+                                        isOverCapacity
+                                            ? 'border-red-500 bg-red-50'
+                                            : 'bg-gray-100'
+                                    }`}
                                 />
+                                {isOverCapacity && (
+                                    <p className="mt-1 text-sm text-red-600">
+                                        {capacityError}
+                                    </p>
+                                )}
 
                                 {errors.guest_count && (
                                     <p className="mt-1 text-sm text-red-600">
@@ -501,7 +531,11 @@ export default function ReservationCreateModal({
                                             e.target.value
                                         )
                                     }
-                                    className="w-full rounded-lg border px-4 py-3"
+                                    className={`w-full rounded-lg border px-4 py-3 ${
+                                        isOverCapacity
+                                            ? 'border-red-500 bg-red-50'
+                                            : ''
+                                    }`}
                                 />
 
                                 {errors.adult_count && (
@@ -527,7 +561,11 @@ export default function ReservationCreateModal({
                                             e.target.value
                                         )
                                     }
-                                    className="w-full rounded-lg border px-4 py-3"
+                                    className={`w-full rounded-lg border px-4 py-3 ${
+                                        isOverCapacity
+                                            ? 'border-red-500 bg-red-50'
+                                            : ''
+                                    }`}
                                 />
 
                                 {errors.child_count && (
@@ -804,7 +842,8 @@ export default function ReservationCreateModal({
                                 processing ||
                                 !data.room_id ||
                                 !data.checkin_date ||
-                                !data.checkout_date
+                                !data.checkout_date ||
+                                isOverCapacity
                             }
                             className="rounded-lg bg-blue-600 px-8 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >

@@ -39,8 +39,8 @@
 
         // 空室検索結果
         const [availableRooms, setAvailableRooms] = useState([]);
-            
-            
+
+
         // 現在の予約部屋を含めた表示用候補
         const roomOptions = useMemo(() => {
             const currentRoom = rooms.find(
@@ -62,8 +62,8 @@
             reservation.room_id,
             availableRooms,
         ]);
-        
-        
+
+
         // 空室検索処理
         const searchAvailableRooms = async () => {
             if (
@@ -106,8 +106,8 @@
                 setAvailableRooms([]);
             }
         };
-        
-        
+
+
         // 日程変更時の空室検索
         useEffect(() => {
             searchAvailableRooms();
@@ -115,8 +115,8 @@
             data.checkin_date,
             data.checkout_date,
         ]);
-        
-        
+
+
         // 選択中の部屋が空室ではなくなった場合
         useEffect(() => {
             if (!data.room_id) {
@@ -124,27 +124,35 @@
             }
         
             const selectedRoomId = Number(data.room_id);
+        
             const isAvailable = availableRooms.some(
                 room => Number(room.id) === selectedRoomId
             );
         
-            if (!isAvailable) {
+            const isCurrentRoom =
+                selectedRoomId === Number(reservation.room_id);
+        
+            if (!isAvailable && !isCurrentRoom) {
                 setData('room_id', '');
             }
         }, [
             availableRooms,
+            data.room_id,
+            reservation.room_id,
         ]);
 
 
         // 選択中の部屋取得
         const selectedRoom = useMemo(() => {
             return (
-                rooms.find(
-                    (r) => Number(r.id) === Number(data.room_id)
+                roomOptions.find(
+                    room => Number(room.id) === Number(data.room_id)
                 ) ?? null
             );
-        }, [rooms, data.room_id]);
-
+        }, [
+            roomOptions,
+            data.room_id,
+        ]);
 
         // 泊数計算
         const stayNights = useMemo(() => {
@@ -221,9 +229,31 @@
         ]);
 
 
+        // 宿泊人数
+        const guestCount =
+            Number(data.adult_count || 0) +
+            Number(data.child_count || 0);
+
+        // 最大許容人数
+        const maxCapacity =
+            selectedRoom?.capacity_max !== null &&
+            selectedRoom?.capacity_max !== undefined
+                ? Number(selectedRoom.capacity_max)
+                : null;
+
+        // 定員オーバー判定
+        const isOverCapacity =
+            maxCapacity !== null &&
+            guestCount > maxCapacity;
+
+
         // 登録処理
         const submit = (e) => {
             e.preventDefault();
+
+            if (isOverCapacity) {
+                return;
+            }
 
             put(route('reservations.update', reservation.id), {
                 onSuccess: () => {
@@ -463,8 +493,18 @@
                                         type="number"
                                         value={data.guest_count}
                                         disabled
-                                        className="w-full rounded-lg border bg-gray-100 px-4 py-3"
+                                            className={`w-full rounded-lg border px-4 py-3 ${
+                                                isOverCapacity
+                                                    ? 'border-red-500 bg-red-50'
+                                                    : 'bg-gray-100'
+                                            }`}
                                     />
+                                    {isOverCapacity && selectedRoom && (
+                                        <p className="mt-1 text-sm text-red-600">
+                                            選択された部屋の最大宿泊人数は
+                                            {selectedRoom.capacity_max}人です。
+                                        </p>
+                                    )}
 
                                     {errors.guest_count && (
                                         <p className="mt-1 text-sm text-red-600">
@@ -489,7 +529,11 @@
                                                 e.target.value
                                             )
                                         }
-                                        className="w-full rounded-lg border px-4 py-3"
+                                        className={`w-full rounded-lg border px-4 py-3 ${
+                                            isOverCapacity
+                                                ? 'border-red-500 bg-red-50'
+                                                : ''
+                                        }`}
                                     />
 
                                     {errors.adult_count && (
@@ -515,7 +559,11 @@
                                                 e.target.value
                                             )
                                         }
-                                        className="w-full rounded-lg border px-4 py-3"
+                                        className={`w-full rounded-lg border px-4 py-3 ${
+                                            isOverCapacity
+                                                ? 'border-red-500 bg-red-50'
+                                                : ''
+                                        }`}
                                     />
 
                                     {errors.child_count && (
@@ -792,7 +840,8 @@
                                     processing ||
                                     !data.room_id ||
                                     !data.checkin_date ||
-                                    !data.checkout_date
+                                    !data.checkout_date ||
+                                    isOverCapacity
                                 }
                                 className="rounded-lg bg-blue-600 px-8 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                             >

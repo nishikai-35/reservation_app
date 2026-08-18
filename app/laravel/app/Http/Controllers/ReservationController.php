@@ -208,6 +208,30 @@ class ReservationController extends Controller
             'address' => ['nullable', 'string'],
             'note' => ['nullable', 'string'],
         ]);
+        
+
+        // 部屋情報取得
+        $room = Room::findOrFail($validated['room_id']);
+
+        // 宿泊人数計算
+        $guestCount =
+            ($validated['adult_count'] ?? 0)
+            + ($validated['child_count'] ?? 0);
+
+        // 最大宿泊人数チェック
+        if (
+            $room->capacity_max !== null &&
+            $guestCount > $room->capacity_max
+        ) {
+            return back()->withErrors([
+                'guest_count' =>
+                    "選択された部屋の最大宿泊人数は{$room->capacity_max}人です。",
+            ])->withInput();
+        }
+
+
+        // 宿泊人数をサーバー側で再計算
+        $validated['guest_count'] = $guestCount;
 
         $exists = Reservation::where('room_id', $validated['room_id'])
             ->where('status', '!=', 9)

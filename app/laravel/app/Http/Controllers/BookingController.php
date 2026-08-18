@@ -50,6 +50,8 @@ class BookingController extends Controller
                 'id',
                 'room_number',
                 'name',
+                'capacity_min',
+                'capacity_max',
                 'adult_price',
                 'child_price'
             )
@@ -138,11 +140,27 @@ class BookingController extends Controller
             = null;
 
         
-        // 料金計算
+        // 部屋情報取得
         $room = Room::findOrFail(
         $validated['room_id']
         );
 
+        // 宿泊人数チェック
+        $guestCount =
+            $validated['adult_count']
+            + ($validated['child_count'] ?? 0);
+
+        if (
+            $room->capacity_max !== null &&
+            $guestCount > $room->capacity_max
+        ) {
+            return back()->withErrors([
+                'guest_count' =>
+                    "選択された部屋の最大宿泊人数は{$room->capacity_max}人です。",
+            ]);
+        }
+
+        // 宿泊日数計算
         $checkin = Carbon::parse(
             $validated['checkin_date']
         );
@@ -264,7 +282,7 @@ class BookingController extends Controller
 
         $days = $checkin->diffInDays(
             $checkout
-        );
+        );  
 
         // 万が一0泊の場合
         if($days <= 0){
