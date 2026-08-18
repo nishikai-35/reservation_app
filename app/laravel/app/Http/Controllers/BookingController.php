@@ -32,14 +32,20 @@ class BookingController extends Controller
                 'required',
                 'date'
             ],
-
+    
             'checkout_date' => [
                 'required',
                 'date',
                 'after:checkin_date'
             ],
+    
+            'reservation_id' => [
+                'nullable',
+                'integer',
+                'exists:reservations,id'
+            ],
         ]);
-
+    
         $rooms = Room::select(
                 'id',
                 'room_number',
@@ -48,16 +54,42 @@ class BookingController extends Controller
                 'child_price'
             )
             ->whereNotExists(function ($query) use ($validated) {
+    
                 $query->selectRaw(1)
                     ->from('reservations')
-                    ->whereColumn('reservations.room_id', 'rooms.id')
-                    ->where('status', '!=', 9)
-                    ->where('checkin_date', '<', $validated['checkout_date'])
-                    ->where('checkout_date', '>', $validated['checkin_date']);
+                    ->whereColumn(
+                        'reservations.room_id',
+                        'rooms.id'
+                    )
+                    ->where(
+                        'status',
+                        '!=',
+                        9
+                    )
+                    ->where(
+                        'checkin_date',
+                        '<',
+                        $validated['checkout_date']
+                    )
+                    ->where(
+                        'checkout_date',
+                        '>',
+                        $validated['checkin_date']
+                    );
+    
+                // 編集時は現在の予約自身を除外
+                if (!empty($validated['reservation_id'])) {
+                    $query->where(
+                        'reservations.id',
+                        '!=',
+                        $validated['reservation_id']
+                    );
+                }
+    
             })
             ->orderBy('room_number')
             ->get();
-
+    
         return response()->json([
             'rooms' => $rooms,
         ]);

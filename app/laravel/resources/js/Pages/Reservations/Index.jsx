@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CreateReservationModal from '@/Components/CreateReservationModal';
+import EditReservationModal from '@/Components/EditReservationModal';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -90,8 +91,10 @@ export default function Index({ auth, reservations, rooms = [] }) {
     };
 
 
-    // モーダル表示の管理状態
+    // モーダル表示管理
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedReservation, setSelectedReservation] = useState(null);
 
 
     return (
@@ -405,15 +408,16 @@ export default function Index({ auth, reservations, rooms = [] }) {
                                                     {/* 操作 */}
                                                     <td className="w-48 border-b p-3">
                                                         <div className="flex justify-center gap-2">
-                                                            <Link
-                                                                href={route(
-                                                                    'reservations.edit',
-                                                                    reservation.id
-                                                                )}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setSelectedReservation(reservation);
+                                                                    setShowEditModal(true);
+                                                                }}
                                                                 className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
                                                             >
                                                                 編集
-                                                            </Link>
+                                                            </button>
                                                             
                                                             <button
                                                                 type="button"
@@ -478,6 +482,17 @@ export default function Index({ auth, reservations, rooms = [] }) {
                         />
                     )}
 
+                    {showEditModal && selectedReservation && (
+                        <EditReservationModal
+                            reservation={selectedReservation}
+                            rooms={rooms}
+                            refreshReservations={() => router.reload()}
+                            onClose={() => {
+                                setShowEditModal(false);
+                                setSelectedReservation(null);
+                            }}
+                        />
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>

@@ -12,7 +12,8 @@ class RoomAvailabilityService
     // 指定期間の空室一覧取得
     public function getAvailableRooms(
         string $checkin,
-        string $checkout
+        string $checkout,
+        ?int $excludeReservationId = null
     ) {
 
         return Room::select(
@@ -24,7 +25,8 @@ class RoomAvailabilityService
             )
             ->whereNotExists(function ($query) use (
                 $checkin,
-                $checkout
+                $checkout,
+                $excludeReservationId
             ) {
 
                 $query->selectRaw(1)
@@ -48,6 +50,15 @@ class RoomAvailabilityService
                         '>',
                         $checkin
                     );
+
+                // 編集時は自分自身の予約を除外
+                if ($excludeReservationId) {
+                    $query->where(
+                        'reservations.id',
+                        '!=',
+                        $excludeReservationId
+                    );
+                }
 
             })
             ->orderBy('room_number')
@@ -85,13 +96,11 @@ class RoomAvailabilityService
 
         // 編集時は自分自身を除外
         if ($excludeReservationId) {
-
             $query->where(
                 'id',
                 '!=',
                 $excludeReservationId
             );
-
         }
 
         return !$query->exists();

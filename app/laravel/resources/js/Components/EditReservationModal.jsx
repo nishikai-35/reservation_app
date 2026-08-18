@@ -37,9 +37,34 @@
         });
 
 
-        // 空室検索
+        // 空室検索結果
         const [availableRooms, setAvailableRooms] = useState([]);
-
+            
+            
+        // 現在の予約部屋を含めた表示用候補
+        const roomOptions = useMemo(() => {
+            const currentRoom = rooms.find(
+                room => Number(room.id) === Number(reservation.room_id)
+            );
+        
+            if (
+                currentRoom &&
+                !availableRooms.some(
+                    room => Number(room.id) === Number(currentRoom.id)
+                )
+            ) {
+                return [currentRoom, ...availableRooms];
+            }
+        
+            return availableRooms;
+        }, [
+            rooms,
+            reservation.room_id,
+            availableRooms,
+        ]);
+        
+        
+        // 空室検索処理
         const searchAvailableRooms = async () => {
             if (
                 !data.checkin_date ||
@@ -48,46 +73,68 @@
                 setAvailableRooms([]);
                 return;
             }
-
-            const response = await fetch('/booking/search', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN':
-                        document
-                            .querySelector('meta[name="csrf-token"]')
-                            .content,
-                },
-                body: JSON.stringify({
-                    checkin_date: data.checkin_date,
-                    checkout_date: data.checkout_date,
-                    reservation_id: reservation.id,
-                }),
-            });
-
-            const result = await response.json();
-            setAvailableRooms(result.rooms);
+        
+            try {
+                const response = await fetch('/booking/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN':
+                            document.querySelector(
+                                'meta[name="csrf-token"]'
+                            ).content,
+                    },
+                    body: JSON.stringify({
+                        checkin_date: data.checkin_date,
+                        checkout_date: data.checkout_date,
+                        reservation_id: reservation.id,
+                    }),
+                });
+            
+                if (!response.ok) {
+                    throw new Error(
+                        `空室検索に失敗しました: ${response.status}`
+                    );
+                }
+            
+                const result = await response.json();
+            
+                setAvailableRooms(result.rooms ?? []);
+            
+            } catch (error) {
+                console.error('空室検索エラー:', error);
+                setAvailableRooms([]);
+            }
         };
-
+        
+        
+        // 日程変更時の空室検索
         useEffect(() => {
             searchAvailableRooms();
         }, [
             data.checkin_date,
             data.checkout_date,
         ]);
-
+        
+        
+        // 選択中の部屋が空室ではなくなった場合
         useEffect(() => {
-
-            if (
-                data.room_id &&
-                Number(data.room_id) !== Number(reservation.room_id) &&
-                !availableRooms.some(
-                    room => Number(room.id) === Number(data.room_id)
-                )
-            ) {
+            if (!data.room_id) {
+                return;
+            }
+        
+            const selectedRoomId = Number(data.room_id);
+            const isAvailable = availableRooms.some(
+                room => Number(room.id) === selectedRoomId
+            );
+        
+            if (!isAvailable) {
                 setData('room_id', '');
             }
-        }, [availableRooms,]);
+        }, [
+            availableRooms,
+        ]);
+
 
         // 選択中の部屋取得
         const selectedRoom = useMemo(() => {
@@ -151,6 +198,7 @@
             data.child_count,
         ]);
 
+
         // 合計料金フォームに反映
         useEffect(() => {
             setData('amount', totalPrice);
@@ -212,6 +260,7 @@
         
                     {/* フォーム */}
                     <form
+                        id="edit-reservation-form"
                         onSubmit={submit}
                         className="flex-1 overflow-y-auto bg-gray-50 p-6"
                     >
@@ -387,7 +436,7 @@
                                                 : '部屋を選択してください'}
                                         </option>
                                             
-                                        {availableRooms.map((roomItem) => (
+                                        {roomOptions.map((roomItem) => (
                                             <option
                                                 key={roomItem.id}
                                                 value={roomItem.id}
@@ -738,6 +787,7 @@
                             </button>
                             <button
                                 type="submit"
+                                form="edit-reservation-form"
                                 disabled={
                                     processing ||
                                     !data.room_id ||

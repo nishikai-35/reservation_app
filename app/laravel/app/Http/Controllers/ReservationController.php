@@ -49,21 +49,16 @@ class ReservationController extends Controller
                             ->whereDate('checkout_date', '>=', $start);
 
                     } elseif ($start) {
-
                         $query->whereDate('checkout_date', '>=', $start);
 
                     } elseif ($end) {
-
                         $query->whereDate('checkin_date', '<=', $end);
-
                     }
                 }
             )
             ->orderByDesc('created_at')
-
             ->paginate(10)
             ->withQueryString();
-
             
         return Inertia::render('Reservations/Index', [
             'reservations' => $reservations,
@@ -78,6 +73,7 @@ class ReservationController extends Controller
             ]),
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -119,7 +115,8 @@ class ReservationController extends Controller
         $validated['adult_count'] = $validated['adult_count'] ?? 0;
         $validated['child_count'] = $validated['child_count'] ?? 0;
         $validated['payment_status'] = $validated['payment_status'] ?? 0;
-         // サーバー側で料金を自動計算
+
+        // サーバー側で料金を自動計算
         $room = Room::findOrFail($validated['room_id']);
         $checkin = Carbon::parse($validated['checkin_date']);
         $checkout = Carbon::parse($validated['checkout_date']);
@@ -147,7 +144,7 @@ class ReservationController extends Controller
             ])->withInput();
         }
 
-        
+
         // 予約登録
         $reservation = Reservation::create($validated);
 
@@ -238,6 +235,7 @@ class ReservationController extends Controller
             ->route('reservations.index')
             ->with('success', '予約を更新しました。');
     }
+
 
     /**
      * Remove the specified resource from storage.
