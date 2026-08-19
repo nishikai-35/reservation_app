@@ -641,6 +641,58 @@
                                         </p>
                                     )}
                                 </div>
+
+                                {/* ステータス */}
+                                <div>
+                                    <label className="mb-2 block text-sm font-semibold">
+                                        ステータス
+                                    </label>
+
+                                    <select
+                                        value={data.status}
+                                        onChange={(e) =>
+                                            setData(
+                                                'status',
+                                                Number(e.target.value)
+                                            )
+                                        }
+                                        className="w-full rounded-lg border px-4 py-3"
+                                    >
+                                        <option value={1}>
+                                            予約済み
+                                        </option>
+                                    
+                                        <option value={2}>
+                                            チェックイン済み
+                                        </option>
+                                    
+                                        <option value={3}>
+                                            滞在中
+                                        </option>
+                                    
+                                        <option value={4}>
+                                            延泊中
+                                        </option>
+                                    
+                                        <option value={5}>
+                                            チェックアウト済み
+                                        </option>
+                                    
+                                        <option value={8}>
+                                            保留
+                                        </option>
+                                    
+                                        <option value={9}>
+                                            キャンセル
+                                        </option>
+                                    </select>
+                                    
+                                    {errors.status && (
+                                        <p className="mt-1 text-sm text-red-600">
+                                            {errors.status}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                                 

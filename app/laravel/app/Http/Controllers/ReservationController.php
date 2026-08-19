@@ -207,6 +207,7 @@ class ReservationController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string'],
             'note' => ['nullable', 'string'],
+            'status' => ['required', 'integer', 'in:1,2,3,4,5,8,9'],
         ]);
         
 
@@ -250,7 +251,6 @@ class ReservationController extends Controller
         $validated['child_count'] = $validated['child_count'] ?? 0;
         $validated['amount'] = $validated['amount'] ?? 0;
         $validated['payment_status'] = $validated['payment_status'] ?? 0;
-        $validated['status'] = 1;
 
         // 予約内容保存
         $reservation->update($validated);
