@@ -336,104 +336,120 @@ export default function Index({ auth, reservations, rooms = [] }) {
                                                 </td>
                                             </tr>
                                         ) : (
-                                            reservationList.map((reservation) => (
-                                                <tr
-                                                    key={reservation.id}
-                                                    className="hover:bg-gray-50"
-                                                >
-                                                    {/* ステータス */}
-                                                    <td className="border-b p-3">
-                                                        <span
-                                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold
-                                                                ${
-                                                                    reservation.status == 1
-                                                                        ? 'bg-blue-100 text-blue-700'
-                                                                        : reservation.status == 2
-                                                                        ? 'bg-green-100 text-green-700'
-                                                                        : reservation.status == 3
-                                                                        ? 'bg-yellow-100 text-yellow-700'
-                                                                        : reservation.status == 4
-                                                                        ? 'bg-orange-100 text-orange-700'
-                                                                        : reservation.status == 5
-                                                                        ? 'bg-gray-200 text-gray-700'
-                                                                        : reservation.status == 8
-                                                                        ? 'bg-purple-100 text-purple-700'
-                                                                        : 'bg-red-100 text-red-700'
-                                                                }
-                                                            `}
-                                                        >
-                                                            {statusLabels[reservation.status]}
-                                                        </span>
-                                                    </td>
-                                                            
-                                                    {/* 予約番号 */}
-                                                    <td className="border-b p-3">
-                                                        {reservation.reservation_number}
-                                                    </td>
-                                                            
-                                                    {/* 宿泊者名 */}
-                                                    <td className="border-b p-3">
-                                                        {reservation.guest_name}
-                                                    </td>
-                                                            
-                                                    {/* 部屋 */}
-                                                    <td className="border-b p-3">
-                                                        {reservation.room?.room_number}
-                                                        <br />
-                                                        <span className="text-sm text-gray-500">
-                                                            {reservation.room?.name}
-                                                        </span>
-                                                    </td>
+                                            reservationList.map((reservation) => {
 
-                                                    {/* チェックイン */}
-                                                    <td className="border-b p-3 whitespace-nowrap">
-                                                        {formatDateTime(reservation.checkin_date)}
-                                                    </td>
+                                                const guestCount = Number(reservation.guest_count || 0);
+                                                const maxCapacity = reservation.room?.capacity_max
+                                                    ? Number(reservation.room.capacity_max)
+                                                    : null;
+                                                
+                                                const isOverCapacity =
+                                                    maxCapacity !== null &&
+                                                    guestCount > maxCapacity;
 
-                                                    {/* チェックアウト */}
-                                                    <td className="border-b p-3 whitespace-nowrap">
-                                                        {formatDateTime(reservation.checkout_date)}
-                                                    </td>
-                                                            
-                                                    {/* 人数 */}
-                                                    <td className="border-b p-3 text-center">
-                                                        {reservation.guest_count}名
-                                                    </td>
-                                                            
-                                                    {/* 電話番号 */}
-                                                    <td className="border-b p-3">
-                                                        {reservation.phone}
-                                                    </td>
-                                                            
-                                                    {/* 操作 */}
-                                                    <td className="w-48 border-b p-3">
-                                                        <div className="flex justify-center gap-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setSelectedReservation(reservation);
-                                                                    setShowEditModal(true);
-                                                                }}
-                                                                className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
+                                                return (
+                                                    <tr
+                                                        key={reservation.id}
+                                                        className={`${
+                                                            isOverCapacity
+                                                                ? 'bg-red-100 hover:bg-red-200'
+                                                                : 'hover:bg-gray-50'
+                                                        }`}
+                                                    >
+                                                        {/* ステータス */}
+                                                        <td className="border-b p-3">
+                                                            <span
+                                                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                                                                    ${
+                                                                        reservation.status == 1
+                                                                            ? 'bg-blue-100 text-blue-700'
+                                                                            : reservation.status == 2
+                                                                            ? 'bg-green-100 text-green-700'
+                                                                            : reservation.status == 3
+                                                                            ? 'bg-yellow-100 text-yellow-700'
+                                                                            : reservation.status == 4
+                                                                            ? 'bg-orange-100 text-orange-700'
+                                                                            : reservation.status == 5
+                                                                            ? 'bg-gray-200 text-gray-700'
+                                                                            : reservation.status == 8
+                                                                            ? 'bg-purple-100 text-purple-700'
+                                                                            : 'bg-red-100 text-red-700'
+                                                                    }
+                                                                `}
                                                             >
-                                                                編集
-                                                            </button>
-                                                            
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    deleteReservation(
-                                                                        reservation.id
-                                                                    )
-                                                                }
-                                                                className="rounded bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
-                                                            >
-                                                                削除
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
+                                                                {statusLabels[reservation.status]}
+                                                            </span>
+                                                        </td>
+                                                                
+                                                        {/* 予約番号 */}
+                                                        <td className="border-b p-3">
+                                                            {reservation.reservation_number}
+                                                        </td>
+                                                                
+                                                        {/* 宿泊者名 */}
+                                                        <td className="border-b p-3">
+                                                            {reservation.guest_name}
+                                                        </td>
+                                                                
+                                                        {/* 部屋 */}
+                                                        <td className="border-b p-3">
+                                                            {reservation.room?.room_number}
+                                                            <br />
+                                                            <span className="text-sm text-gray-500">
+                                                                {reservation.room?.name}
+                                                            </span>
+                                                        </td>
+
+                                                        {/* チェックイン */}
+                                                        <td className="border-b p-3 whitespace-nowrap">
+                                                            {formatDateTime(reservation.checkin_date)}
+                                                        </td>
+
+                                                        {/* チェックアウト */}
+                                                        <td className="border-b p-3 whitespace-nowrap">
+                                                            {formatDateTime(reservation.checkout_date)}
+                                                        </td>
+
+                                                        {/* 人数 */}
+                                                        <td className="border-b p-3 whitespace-nowrap">
+                                                            {reservation.guest_count}名
+                                                        </td>
+                                                                
+                                                        {/* 電話番号 */}
+                                                        <td className="border-b p-3">
+                                                            {reservation.phone}
+                                                        </td>
+                                                                
+                                                        {/* 操作 */}
+                                                        <td className="w-48 border-b p-3">
+                                                            <div className="flex justify-center gap-2">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setSelectedReservation(reservation);
+                                                                        setShowEditModal(true);
+                                                                    }}
+                                                                    className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
+                                                                >
+                                                                    編集
+                                                                </button>
+                                                                
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        deleteReservation(
+                                                                            reservation.id
+                                                                        )
+                                                                    }
+                                                                    className="rounded bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
+                                                                >
+                                                                    削除
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
                                         )}
                                     </tbody>
                                 </table>
